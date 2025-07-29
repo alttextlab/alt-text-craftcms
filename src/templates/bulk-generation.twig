@@ -1,0 +1,131 @@
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'bulk-generation' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <style>
+        .alt-section {
+            padding: 20px;
+        }
+
+        .alt-section h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .alt-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .alt-cards-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .alt-card {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .alt-card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .alt-card .alt-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .utility-form {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        @media (max-width: 768px) {
+            .alt-cards-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <div class="alt-section">
+        <h1>Bulk Alt Text Overview</h1>
+
+        <div class="alt-cards-container">
+            <div class="alt-cards-row">
+                <div class="alt-card">
+                    <h2>Count of images</h2>
+                    <div class="alt-number">{{ totalCountOfImages }}</div>
+                </div>
+
+                <div class="alt-card">
+                    <h2>Images without alt text</h2>
+                    <div class="alt-number">{{ assetsWithoutAlt }}</div>
+                </div>
+            </div>
+
+            <div class="utility-form">
+                <form class="utility" method="post" accept-charset="UTF-8">
+                    {{ actionInput('alt-text-lab/bulk-generation-queue') }}
+                    {{ csrfInput() }}
+
+                    {{ forms.checkbox({
+                        name: 'OverwriteAltText',
+                        id: 'OverwriteAltText',
+                        label: 'Overwrite Alt Text',
+                    }) }}
+
+                    <br/>
+                    <p id="generation-target-info" style="margin-top: 10px; font-weight: 500;"></p>
+                    <div class="buttons">
+                        <button type="submit" class="btn submit" id="generation-button">{{ 'Run generation' }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('OverwriteAltText');
+            const button = document.getElementById('generation-button');
+            const infoText = document.getElementById('generation-target-info');
+
+            const total = {{ totalCountOfImages|json_encode }};
+            const withoutAlt = {{ assetsWithoutAlt|json_encode }};
+
+            function updateInfo() {
+                const targetCount = checkbox.checked ? total : withoutAlt;
+
+                if (checkbox.checked) {
+                    infoText.textContent = `Alt text will be generated for ${targetCount} images (including ones that already have alt text).`;
+                } else {
+                    infoText.textContent = `Alt text will be generated only for ${targetCount} images without alt text.`;
+                }
+
+                if (targetCount === 0) {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                }
+            }
+
+            updateInfo();
+            checkbox.addEventListener('change', updateInfo);
+        });
+
+    </script>
+
+{% endblock %}

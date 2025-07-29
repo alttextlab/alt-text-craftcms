@@ -1,0 +1,22 @@
+{
+  "name": "alttextlab/alttextlab",
+  "description": "Alt Text generation plugin for Craft CMS.",
+  "type": "craft-plugin",
+  "version": "1.0.0",
+  "require": {
+    "craftcms/cms": "^5.0",
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "alttextlab\\AltTextLab\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "alt-text-lab",
+    "name": "Alt Text Lab",
+    "developer": "AltTextLab",
+    "developerUrl": "https://alttextlab.com",
+    "class": "alttextlab\\AltTextLab\\AltTextLab"
+  }
+}

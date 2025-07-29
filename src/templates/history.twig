@@ -1,0 +1,105 @@
+{% set selectedSubnavItem = 'history' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <style>
+        .space-block {
+            width: 100%;
+            height: 20px;
+        }
+        .refresh-link{
+            text-decoration: underline;
+            cursor: pointer !important;
+        }
+        .refresh-notification{
+            color: rgba(169,239,169,0.66);
+            font-weight: bold;
+        }
+        .image-size{
+            width:75px;
+            height:75px;
+        }
+    </style>
+
+    <h1>History generation page</h1>
+
+    {% set thumb = {
+        mode: 'crop',
+        width: 75,
+        height: 75,
+        quality: 75,
+        position: 'top-center'
+    } %}
+
+    <div class="space-block"></div>
+    <div class="tableview tablepane">
+        <table class="data fullwidth">
+            <thead>
+            <tr>
+                <th style="width:50px;">Id</th>
+                <th style="min-width:100px;">Asset</th>
+                <th style="min-width:300px">Current alt text</th>
+                <th style="min-width:300px">Generated alt text</th>
+                <th>Generation date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for asset in assets %}
+                <tr>
+                    <td>{{ asset.id }}</td>
+                    <td>
+                        {% if asset.assetId %}
+                            {% set assetRow = craft.assets.id(asset.assetId).one() %}
+                            {% if assetRow %}
+                                {% if assetRow.canView(currentUser) %}
+                                    <a href="{{ assetRow.cpEditUrl }}">
+                                        <img src="{{ assetRow.getUrl(thumb) }}" class="image-size"
+                                             alt="{{ assetRow.alt }}"/>
+                                    </a>
+                                {% else %}
+                                    <img src="{{ assetRow.getUrl(thumb) }}" class="image-size"
+                                         alt="{{ assetRow.alt }}"/>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if asset %}
+                            {{ asset.currentAltText }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if asset %}
+                            {{ asset.generatedAltText }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if asset %}
+                            {{ asset.dateCreated|date('Y-m-d H:i') }}
+                        {% endif %}
+                    </td>
+                    <td><a class="refresh-link" id="alt-btn-{{ asset.id }}" onclick="changeAltTextToSelected({{ asset.id }})">Use This alt</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include "alt-text-lab/includes/pagination-panel" %}
+    </div>
+    <script>
+        function changeAltTextToSelected(assetId) {
+            const link = document.querySelector(`#alt-btn-` + assetId);
+            if (link) {
+                link.outerHTML = `<span class="refresh-notification">Added to queue</span>`;
+            }
+            fetch(Craft.getCpUrl('alt-text-lab/utility/change-asset-alt-text'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': Craft.csrfTokenValue
+                },
+                body: JSON.stringify({ assetId: assetId })
+            }).catch(error => console.error(error));
+        }
+    </script>
+{% endblock %}
