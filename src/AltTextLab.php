@@ -62,6 +62,7 @@ class AltTextLab extends Plugin
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['alt-text-lab/history'] = 'alt-text-lab/history';
+            $event->rules['alt-text-lab/bulk-generation-history'] = 'alt-text-lab/bulk-generation-history';
             $event->rules['alt-text-lab/bulk-generation'] = 'alt-text-lab/bulk-generation';
             $event->rules['alt-text-lab/bulk-generation-queue'] = 'alt-text-lab/bulk-generation-queue';
             $event->rules['alt-text-lab/utility'] = 'alt-text-lab/utility';
@@ -99,8 +100,10 @@ class AltTextLab extends Plugin
     {
         $item = parent::getCpNavItem();
 
-        $item['subnav']['history'] = ['label' => 'History', 'url' => 'alt-text-lab/history'];
+        $item['subnav']['settings'] = ['label' => 'Settings', 'url' => 'settings/plugins/alt-text-lab'];
         $item['subnav']['bulk-generation'] = ['label' => 'Bulk generator', 'url' => 'alt-text-lab/bulk-generation'];
+        $item['subnav']['bulk-generation-history'] = ['label' => 'Bulk History', 'url' => 'alt-text-lab/bulk-generation-history'];
+        $item['subnav']['history'] = ['label' => 'History', 'url' => 'alt-text-lab/history'];
         $item['subnav']['log'] = ['label' => 'Logs', 'url' => 'alt-text-lab/log'];
 
         return $item;

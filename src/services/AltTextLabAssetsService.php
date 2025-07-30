@@ -61,6 +61,7 @@ class AltTextLabAssetsService
 
         $fieldsToUpdate = [
             'assetId',
+            'bulkGenerationId',
             'responseId',
             'generatedAltText',
         ];
@@ -93,10 +94,11 @@ class AltTextLabAssetsService
         return  $assetModel;
     }
 
-    public function buildModel($assetId, $responseId, $generatedAltText): AltTextLabAssetModel
+    public function buildModel($assetId, $bulkGenerationId, $responseId, $generatedAltText): AltTextLabAssetModel
     {
-        $model = new AltTextLabAsset();
+        $model = new AltTextLabAssetModel();
         $model->assetId = $assetId;
+        $model->bulkGenerationId = $bulkGenerationId;
         $model->responseId = (int)($responseId ?? 0);
         $model->generatedAltText = $generatedAltText;
 
@@ -132,7 +134,7 @@ class AltTextLabAssetsService
         return $recordsQuery->count();
     }
 
-    public function generateAltText($assetId): void
+    public function generateAltText($assetId, $bulkGenerationId): void
     {
         try {
             $asset = Asset::find()->id($assetId)->one();
@@ -163,7 +165,7 @@ class AltTextLabAssetsService
             $success = Craft::$app->elements->saveElement($asset);
 
             if ($success) {
-                $this->saveAsset($this->buildModel($assetId, $responseArray['id'], $responseArray['result']));
+                $this->saveAsset($this->buildModel($assetId, $bulkGenerationId, $responseArray['id'], $responseArray['result']));
             }
 
             Craft::info('Alt text generated: ' . print_r($responseArray, true), __METHOD__);

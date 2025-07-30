@@ -1,0 +1,49 @@
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'bulk-generation-history' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+        <style>
+            .space-block {
+                width: 100%;
+                height: 20px;
+            }
+        </style>
+
+        <h1>Bulk generation history page</h1>
+
+        <div class="space-block"></div>
+        <div class="tableview tablepane">
+            <table class="data fullwidth">
+                <thead>
+                <tr>
+                    <th style="width:50px;">Id</th>
+                    <th>Total count of images</th>
+                    <th>Successfully Generated</th>
+                    <th>Failed to Generate</th>
+                    <th>Generation date</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in bulkGenerationItems %}
+                    {% if item %}
+                        <tr>
+                            <td>
+                                {{ item.id }}
+                            </td>
+                            <td>
+                                {{ item.countOfImages }}
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                                {{ item.dateCreated|date('Y-m-d H:i') }}
+                            </td>
+                        </tr> {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endblock %}

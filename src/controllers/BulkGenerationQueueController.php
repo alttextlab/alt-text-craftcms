@@ -2,6 +2,8 @@
 
 namespace alttextlab\AltTextLab\controllers;
 
+use alttextlab\AltTextLab\models\AltTextLabBulkGeneration;
+use alttextlab\AltTextLab\services\BulkGenerationService;
 use Craft;
 use craft\helpers\Queue;
 use alttextlab\AltTextLab\AltTextLab;
@@ -15,6 +17,7 @@ class BulkGenerationQueueController extends Controller
     public function actionIndex()
     {
         $craftAssetsService = new CraftAssetsService();
+        $bulkGenerationService = new BulkGenerationService();
         $uid = Craft::$app->getRequest()->getQueryParam('uid');
         $ids = array();
         $settings = AltTextLab::getInstance()->getSettings();
@@ -27,9 +30,15 @@ class BulkGenerationQueueController extends Controller
 
         $allAssets = $craftAssetsService->getAssetsByAltTextFilter($overwriteAltText, $ids);
 
+        $bulkGenerationModel = new AltTextLabBulkGeneration();
+        $bulkGenerationModel->countOfImages = count($allAssets);
+
+        $bulkGenerationModel = $bulkGenerationService->saveAsset($bulkGenerationModel);
+
         foreach ($allAssets as $asset) {
             Queue::push(new GenerateAltTextJob([
-                'assetId' => $asset->id
+                'assetId' => $asset->id,
+                'bulkGenerationId' => $bulkGenerationModel->id
             ]));
         }
 
