@@ -13,6 +13,9 @@ class AltTextLabBulkGeneration extends Model
     public ?int $countOfImages = null;
     public ?DateTime $dateCreated = null;
 
+    public ?int $successfulCount = null;
+    public ?int $failedCount = null;
+
     protected function defineRules(): array
     {
         return array_merge(parent::defineRules(), [

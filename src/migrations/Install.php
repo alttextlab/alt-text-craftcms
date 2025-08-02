@@ -58,9 +58,19 @@ class Install extends Migration
             [
                 'id' => $this->primaryKey(),
                 'assetId' => $this->integer()->notNull(),
+                'bulkGenerationId' => $this->integer()->notNull(),
                 'logMessage' => $this->string(512)->defaultValue(null),
                 'dateCreated' => $this->dateTime()->notNull(),
             ]
+        );
+
+        $this->addForeignKey(
+            null,
+            AltTextLabLog::tableName,
+            ['bulkGenerationId'],
+            AltTextLabBulkGeneration::tableName,
+            ['id'],
+            'CASCADE'
         );
 
 

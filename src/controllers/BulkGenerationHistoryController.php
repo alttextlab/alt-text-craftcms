@@ -15,11 +15,23 @@ class BulkGenerationHistoryController extends Controller
     {
         $settings = AltTextLab::getInstance()->getSettings();
         $bulkGenerationService = new BulkGenerationService();
+        $request = Craft::$app->getRequest();
+
+        $limit = $request->getQueryParam('limit', $settings->itemPerPage);
+        $offset = $request->getQueryParam('offset', 0);
+
+        $logTotalCount = $bulkGenerationService->getTotalCount();
+        $bulkGenerations = $bulkGenerationService->getAll(['limit' => $limit, 'offset' => $offset]);
 
         $templateParams = [
             'title' => 'Bulk Generation History',
             'settings' => $settings,
-            'bulkGenerationItems'=>$bulkGenerationService->getAll([])
+            'bulkGenerationItems'=> $bulkGenerations,
+            'totalCount' => $logTotalCount,
+            'limit' => $limit,
+            'offset' => $offset,
+            'currentPage' => (int) floor($offset / $limit) + 1,
+            'totalPages' => (int) ceil($logTotalCount / $limit),
         ];
 
         return $this->renderTemplate('alt-text-lab/bulk-generation-history.twig', $templateParams);

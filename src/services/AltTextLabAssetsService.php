@@ -29,12 +29,18 @@ class AltTextLabAssetsService
     {
         $recordsQuery = AltTextLabAssetRecord::find();
 
+        if (array_key_exists('bulkGenerationId', $filters) && $filters['bulkGenerationId']){
+            $recordsQuery->where(['bulkGenerationId' => $filters['bulkGenerationId']]);
+        }
+
         if (array_key_exists('limit', $filters)) {
             $recordsQuery->limit($filters['limit']);
         }
         if (array_key_exists('offset', $filters)) {
             $recordsQuery->offset($filters['offset']);
         }
+
+        $recordsQuery->orderBy(['id' => SORT_DESC]);
 
         $records = $recordsQuery->all();
 
@@ -128,9 +134,14 @@ class AltTextLabAssetsService
         return $success;
     }
 
-    public function getTotalCount(): int
+    public function getTotalCount(array $conditions = []): int
     {
         $recordsQuery = AltTextLabAssetRecord::find();
+
+        if (!empty($conditions)) {
+            $recordsQuery->where($conditions);
+        }
+
         return $recordsQuery->count();
     }
 
@@ -142,13 +153,13 @@ class AltTextLabAssetsService
                 return;
             }
 
-            if (!$this->utilityService->checkAssetIsValid($asset)) {
+            if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
                 return;
             }
 
             $settings = AltTextLab::getInstance()->getSettings();
 
-            $callDetails = $this->prepareApiRequestData($asset, $settings);
+            $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings);
             if (!$callDetails) {
                 return;
             }
@@ -157,7 +168,7 @@ class AltTextLabAssetsService
             $responseArray = json_decode($responseJson, true);
 
             if (!isset($responseArray['result'])) {
-                $this->logService->log($asset->id, 'Alt text doesnt generated for image.');
+                $this->logService->log($asset->id, $bulkGenerationId, 'Alt text doesnt generated for image.');
                 return;
             }
 
@@ -172,17 +183,17 @@ class AltTextLabAssetsService
 
         } catch (\Throwable $e) {
             Craft::error('AltText generation error: ' . $e->getMessage(), __METHOD__);
-            $this->logService->log($assetId, $e->getMessage());
+            $this->logService->log($assetId, $bulkGenerationId, $e->getMessage());
         }
     }
 
-    private function prepareApiRequestData($asset, $settings): ?array
+    private function prepareApiRequestData($asset, $bulkGenerationId, $settings): ?array
     {
         if ($settings->isPublic) {
             $imageUrl = UrlHelper::siteUrl($asset->url);
 
             if (!$imageUrl){
-                $this->logService->log($asset->id, 'Asset doesnt have URL.');
+                $this->logService->log($asset->id, $bulkGenerationId,'Asset doesnt have URL.');
                 return null;
             }
 
@@ -192,7 +203,7 @@ class AltTextLabAssetsService
             $filePath = $fsPath . DIRECTORY_SEPARATOR . $asset->getPath();
 
             if (!file_exists($filePath)) {
-                $this->logService->log($asset->id, 'File does not exist: ' . $filePath);
+                $this->logService->log($asset->id, $bulkGenerationId,'File does not exist: ' . $filePath);
                 return null;
             }
 

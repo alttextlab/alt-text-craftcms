@@ -19,9 +19,12 @@
             width:75px;
             height:75px;
         }
+        .text-center {
+            text-align: center;
+        }
     </style>
 
-    <h1>History generation page</h1>
+    <h2>History generation page</h2>
 
     {% set thumb = {
         mode: 'crop',
@@ -36,18 +39,18 @@
         <table class="data fullwidth">
             <thead>
             <tr>
-                <th style="width:50px;">Id</th>
-                <th style="min-width:100px;">Asset</th>
-                <th style="min-width:300px">Current alt text</th>
-                <th style="min-width:300px">Generated alt text</th>
-                <th>Generation date</th>
-                <th>Actions</th>
+                <th class="text-center">Id</th>
+                <th>Asset</th>
+                <th>Current alt text</th>
+                <th>Generated alt text</th>
+                <th class="text-center">Generation date</th>
+                <th class="text-center">Actions</th>
             </tr>
             </thead>
             <tbody>
             {% for asset in assets %}
                 <tr>
-                    <td>{{ asset.id }}</td>
+                    <td class="text-center">{{ asset.id }}</td>
                     <td>
                         {% if asset.assetId %}
                             {% set assetRow = craft.assets.id(asset.assetId).one() %}
@@ -74,12 +77,12 @@
                             {{ asset.generatedAltText }}
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if asset %}
                             {{ asset.dateCreated|date('Y-m-d H:i') }}
                         {% endif %}
                     </td>
-                    <td><a class="refresh-link" id="alt-btn-{{ asset.id }}" onclick="changeAltTextToSelected({{ asset.id }})">Use This alt</a></td>
+                    <td class="text-center"><a class="refresh-link" id="alt-btn-{{ asset.id }}" onclick="changeAltTextToSelected({{ asset.id }})">Use This alt</a></td>
                 </tr>
             {% endfor %}
             </tbody>

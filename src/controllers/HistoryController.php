@@ -15,20 +15,30 @@ class HistoryController extends Controller
         $settings = AltTextLab::getInstance()->getSettings();
         $request = Craft::$app->getRequest();
 
+        $bulkId = Craft::$app->getRequest()->getQueryParam('bulkId');
+
+        $conditions = array();
+
+        if (!empty($bulkId)) {
+            $conditions['bulkGenerationId'] = $bulkId;
+        }
+
         $limit = $request->getQueryParam('limit', $settings->itemPerPage);
         $offset = $request->getQueryParam('offset', 0);
 
-        $assetsTotalCount = $assetsService->getTotalCount();
+        $assetsTotalCount = $assetsService->getTotalCount($conditions);
+        $assets = $assetsService->getAllAssets(['limit' => $limit, 'offset' => $offset, 'bulkGenerationId' => $bulkId]);
 
         $templateParams = [
             'title' => 'History',
             'settings' => $settings,
-            'assets' => $assetsService->getAllAssets(['limit' => $limit, 'offset' => $offset]),
+            'assets' => $assets,
             'totalCount' => $assetsTotalCount,
             'limit' => $limit,
             'offset' => $offset,
             'currentPage' => (int) floor($offset / $limit) + 1,
             'totalPages' => (int) ceil($assetsTotalCount / $limit),
+            'bulkId' => $bulkId,
         ];
 
         return $this->renderTemplate('alt-text-lab/history.twig', $templateParams);

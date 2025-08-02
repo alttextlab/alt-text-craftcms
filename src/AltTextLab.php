@@ -103,8 +103,8 @@ class AltTextLab extends Plugin
         $item['subnav']['settings'] = ['label' => 'Settings', 'url' => 'settings/plugins/alt-text-lab'];
         $item['subnav']['bulk-generation'] = ['label' => 'Bulk generator', 'url' => 'alt-text-lab/bulk-generation'];
         $item['subnav']['bulk-generation-history'] = ['label' => 'Bulk History', 'url' => 'alt-text-lab/bulk-generation-history'];
-        $item['subnav']['history'] = ['label' => 'History', 'url' => 'alt-text-lab/history'];
-        $item['subnav']['log'] = ['label' => 'Logs', 'url' => 'alt-text-lab/log'];
+        $item['subnav']['history'] = ['label' => 'Successfully Generated', 'url' => 'alt-text-lab/history'];
+        $item['subnav']['log'] = ['label' => 'Failed Generated', 'url' => 'alt-text-lab/log'];
 
         return $item;
     }

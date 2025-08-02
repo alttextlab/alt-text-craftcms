@@ -3,10 +3,20 @@
 namespace alttextlab\AltTextLab\services;
 
 use alttextlab\AltTextLab\models\AltTextLabBulkGeneration as AltTextLabBulkGenerationModel;
+use alttextlab\AltTextLab\models\AltTextLabLog;
 use alttextlab\AltTextLab\records\AltTextLabBulkGeneration as AltTextLabBulkGenerationRecord;
 
 class BulkGenerationService
 {
+
+    private $logService;
+    private $altTextLabAssetService;
+
+    public function __construct()
+    {
+        $this->logService = new LogService();
+        $this->altTextLabAssetService = new AltTextLabAssetsService();
+    }
 
     public function saveAsset(AltTextLabBulkGenerationModel $model): AltTextLabBulkGenerationModel
     {
@@ -44,16 +54,31 @@ class BulkGenerationService
             $recordsQuery->offset($filters['offset']);
         }
 
+        $recordsQuery->orderBy(['id' => SORT_DESC]);
+
         $records = $recordsQuery->all();
 
         $models = array();
 
         foreach ($records as $record) {
             $model = new AltTextLabBulkGenerationModel($record->getAttributes());
+            $model->successfulCount = $this->altTextLabAssetService->getTotalCount(['bulkGenerationId'=>$model->id]);
+            $model->failedCount = $this->logService->getTotalCount(['bulkGenerationId'=>$model->id]);
             $models[] = $model;
         }
 
         return $models;
+    }
+
+    public function getTotalCount(array $conditions = []): int
+    {
+        $recordsQuery = AltTextLabBulkGenerationRecord::find();
+
+        if (!empty($conditions)) {
+            $recordsQuery->where($conditions);
+        }
+
+        return $recordsQuery->count();
     }
 
 }

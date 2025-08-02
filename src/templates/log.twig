@@ -11,9 +11,12 @@
             width:75px;
             height:75px;
         }
+        .text-center {
+            text-align: center;
+        }
     </style>
 
-    <h1>Log page</h1>
+    <h2>Log page</h2>
 
     {% set thumb = {
         mode: 'crop',
@@ -28,16 +31,16 @@
         <table class="data fullwidth">
             <thead>
             <tr>
-                <th style="width:50px;">Id</th>
+                <th class="text-center">Id</th>
                 <th>Asset</th>
                 <th>Message</th>
-                <th>Log date</th>
+                <th class="text-center">Log date</th>
             </tr>
             </thead>
             <tbody>
             {% for log in logs %}
                 <tr>
-                    <td>{{ log.id }}</td>
+                    <td class="text-center">{{ log.id }}</td>
                     <td>
                         {% if log.assetId %}
                             {% set assetRow = craft.assets.id(log.assetId).one() %}
@@ -59,7 +62,7 @@
                             {{ log.logMessage }}
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if log %}
                             {{ log.dateCreated|date('Y-m-d H:i') }}
                         {% endif %}

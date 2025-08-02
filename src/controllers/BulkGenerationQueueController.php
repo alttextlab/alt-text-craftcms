@@ -42,13 +42,7 @@ class BulkGenerationQueueController extends Controller
             ]));
         }
 
-        $templateParams = [
-            'title' => 'Alt Text Lab',
-            'settings' => $settings,
-            'uid' => $uid
-        ];
-
-        return $this->renderTemplate('alt-text-lab/bulk-generation-queue.twig', $templateParams);
+        return $this->redirect('alt-text-lab/bulk-generation-history');
     }
 
 }

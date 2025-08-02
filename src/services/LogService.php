@@ -7,18 +7,20 @@ use alttextlab\AltTextLab\records\AltTextLabLog as AltTextLabLogRecord;
 
 class LogService
 {
-    public function log($assetId, $text): AltTextLabLogModel
+    public function log($assetId, $bulkGenerationId, $text): AltTextLabLogModel
     {
 
         $model = new AltTextLabLogModel();
         $model->assetId = $assetId;
         $model->logMessage = $text;
+        $model->bulkGenerationId = $bulkGenerationId;
 
         $record = new AltTextLabLogRecord();
 
         $fieldsToUpdate = [
             'assetId',
             'logMessage',
+            'bulkGenerationId',
         ];
 
         foreach ($fieldsToUpdate as $handle) {
@@ -41,12 +43,18 @@ class LogService
     {
         $recordsQuery = AltTextLabLogRecord::find();
 
+        if (array_key_exists('bulkGenerationId', $filters) && $filters['bulkGenerationId']){
+            $recordsQuery->where(['bulkGenerationId' => $filters['bulkGenerationId']]);
+        }
+
         if (array_key_exists('limit', $filters)) {
             $recordsQuery->limit($filters['limit']);
         }
         if (array_key_exists('offset', $filters)) {
             $recordsQuery->offset($filters['offset']);
         }
+
+        $recordsQuery->orderBy(['id' => SORT_DESC]);
 
         $records = $recordsQuery->all();
 
@@ -60,9 +68,14 @@ class LogService
         return $models;
     }
 
-    public function getTotalCount(): bool|int|string|null
+    public function getTotalCount(array $conditions = []):int
     {
         $recordsQuery = AltTextLabLogRecord::find();
+
+        if (!empty($conditions)) {
+            $recordsQuery->where($conditions);
+        }
+
         return $recordsQuery->count();
     }
 
