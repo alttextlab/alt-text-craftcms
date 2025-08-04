@@ -30,7 +30,7 @@
             border-radius: 12px;
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .alt-card h2 {
@@ -57,10 +57,37 @@
                 flex-direction: column;
             }
         }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
     </style>
 
     <div class="alt-section">
-        <h1>Bulk Alt Text Overview</h1>
+        <h1>Alt Text Bulk Generation</h1>
 
         <div class="alt-cards-container">
             <div class="alt-cards-row">
@@ -76,22 +103,63 @@
             </div>
 
             <div class="utility-form">
-                <form class="utility" method="post" accept-charset="UTF-8">
-                    {{ actionInput('alt-text-lab/bulk-generation-queue') }}
-                    {{ csrfInput() }}
-
-                    {{ forms.checkbox({
-                        name: 'OverwriteAltText',
-                        id: 'OverwriteAltText',
-                        label: 'Overwrite Alt Text',
-                    }) }}
-
-                    <br/>
-                    <p id="generation-target-info" style="margin-top: 10px; font-weight: 500;"></p>
-                    <div class="buttons">
-                        <button type="submit" class="btn submit" id="generation-button">{{ 'Run generation' }}</button>
+                {% if not settings.apiKey %}
+                    <div class="alert alert-warning">
+                        <p class="text-sm font-medium text-amber-700">
+                            {{ "Welcome to Alt Text Lab!"|t }}
+                        </p>
+                        <p class="text-sm text-amber-700">
+                            {{ "To start generating alt text, please set your API key in the Settings page."|t }}
+                        </p>
+                        <a href="{{ url('settings/plugins/alt-text-lab') }}">
+                            {{ "Open Account Settings →"|t }}
+                        </a>
                     </div>
-                </form>
+                {% elseif not isValidAccount %}
+                    <div class="alert alert-warning">
+                        <p class="text-sm text-amber-700">
+                            You have no more credits left.
+                            {% if accountExist %}
+                                To bulk update your library, please
+                                <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                                   target="_blank"
+                                   class="font-medium text-amber-700 underline hover:text-amber-600">
+                                    purchase more credits.
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <p class="text-sm font-medium mt-0 mb-0">
+                            Available credits: {{ credits ?? 0 }}
+                        </p>
+                        {% if isValidAccount %}
+                            <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits" target="_blank"
+                               class="text-xs whitespace-nowrap text-blue-500 hover:text-blue-600">
+                                Get more credits →
+                            </a>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <form class="utility" method="post" accept-charset="UTF-8">
+                        {{ actionInput('alt-text-lab/bulk-generation-queue') }}
+                        {{ csrfInput() }}
+
+                        {{ forms.checkbox({
+                            name: 'OverwriteAltText',
+                            id: 'OverwriteAltText',
+                            label: 'Overwrite Alt Text',
+                        }) }}
+
+                        <br/>
+                        <p id="generation-target-info" style="margin-top: 10px; font-weight: 500;"></p>
+                        <div class="buttons">
+                            <button type="submit" class="btn submit"
+                                    id="generation-button">{{ 'Run generation' }}</button>
+                        </div>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

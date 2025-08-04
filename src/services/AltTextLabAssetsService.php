@@ -164,11 +164,22 @@ class AltTextLabAssetsService
                 return;
             }
 
-            $responseJson = $this->apiService->generateAltText($callDetails);
-            $responseArray = json_decode($responseJson, true);
+            $responseArray = $this->apiService->generateAltText($callDetails);
+
+            if ($responseArray == 'API_KEY_IS_INVALID'){
+                $this->logService->log($asset->id, $bulkGenerationId, 'Api Key is invalid!');
+                return;
+            }
+
+            if ($responseArray == 'NOT_ENOUGH_FUNDS'){
+                $this->logService->log($asset->id, $bulkGenerationId, 'You dont have enough funds to generate alt text!');
+                return;
+            }
+
+            $responseArray = json_decode($responseArray, true);
 
             if (!isset($responseArray['result'])) {
-                $this->logService->log($asset->id, $bulkGenerationId, 'Alt text doesnt generated for image.');
+                $this->logService->log($asset->id, $bulkGenerationId, 'Something went wrong!');
                 return;
             }
 
@@ -178,11 +189,8 @@ class AltTextLabAssetsService
             if ($success) {
                 $this->saveAsset($this->buildModel($assetId, $bulkGenerationId, $responseArray['id'], $responseArray['result']));
             }
-
-            Craft::info('Alt text generated: ' . print_r($responseArray, true), __METHOD__);
-
         } catch (\Throwable $e) {
-            Craft::error('AltText generation error: ' . $e->getMessage(), __METHOD__);
+            Craft::error('Alt text generation error: ' . $e->getMessage(), __METHOD__);
             $this->logService->log($assetId, $bulkGenerationId, $e->getMessage());
         }
     }
@@ -193,7 +201,7 @@ class AltTextLabAssetsService
             $imageUrl = UrlHelper::siteUrl($asset->url);
 
             if (!$imageUrl){
-                $this->logService->log($asset->id, $bulkGenerationId,'Asset doesnt have URL.');
+                $this->logService->log($asset->id, $bulkGenerationId,"Asset doesn't have URL.");
                 return null;
             }
 
@@ -203,7 +211,7 @@ class AltTextLabAssetsService
             $filePath = $fsPath . DIRECTORY_SEPARATOR . $asset->getPath();
 
             if (!file_exists($filePath)) {
-                $this->logService->log($asset->id, $bulkGenerationId,'File does not exist: ' . $filePath);
+                $this->logService->log($asset->id, $bulkGenerationId,"File doesn't exist: " . $filePath);
                 return null;
             }
 

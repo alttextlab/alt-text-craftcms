@@ -37,4 +37,19 @@ class BulkGenerationHistoryController extends Controller
         return $this->renderTemplate('alt-text-lab/bulk-generation-history.twig', $templateParams);
     }
 
+    public function actionGetCurrentGenerationData(){
+        $bulkGenerationService = new BulkGenerationService();
+        $this->requirePostRequest();
+
+        $request = Craft::$app->getRequest();
+        $ids = $request->getBodyParam('ids');
+
+        $bulkGenerations = $bulkGenerationService->getAll([], $ids);
+
+        return $this->asJson([
+            'success' => true,
+            'data' => $bulkGenerations,
+        ]);
+    }
+
 }

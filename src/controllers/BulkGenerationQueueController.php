@@ -20,7 +20,6 @@ class BulkGenerationQueueController extends Controller
         $bulkGenerationService = new BulkGenerationService();
         $uid = Craft::$app->getRequest()->getQueryParam('uid');
         $ids = array();
-        $settings = AltTextLab::getInstance()->getSettings();
 
         $overwriteAltText = (bool)Craft::$app->getRequest()->getBodyParam('OverwriteAltText');
 

@@ -2,6 +2,7 @@
 
 namespace alttextlab\AltTextLab\controllers;
 
+use alttextlab\AltTextLab\services\ApiService;
 use Craft;
 use craft\web\Controller;
 use alttextlab\AltTextLab\AltTextLab;
@@ -14,6 +15,15 @@ class BulkGenerationController extends Controller
     {
         $settings = AltTextLab::getInstance()->getSettings();
         $craftAssetsService = new CraftAssetsService();
+        $apiService = new ApiService();
+        $account = null;
+
+        $apiKey = $settings->apiKey;
+
+        if ($apiKey) {
+            $account = $apiService->GetAccount();
+        }
+
 
         $ids = array();
 
@@ -24,6 +34,9 @@ class BulkGenerationController extends Controller
 
         $templateParams = [
             'title' => 'Bulk Generation',
+            'isValidAccount' => ($account && $account['isActive']),
+            'accountExist' => (bool)($account),
+            'credits' => $account ? $account['credits'] : 0,
             'settings' => $settings,
             'ids' => count($ids),
             'uid' => $uid,

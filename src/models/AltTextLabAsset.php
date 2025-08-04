@@ -2,10 +2,10 @@
 
 namespace alttextlab\AltTextLab\models;
 
+use alttextlab\AltTextLab\AltTextLab;
 use craft\base\Model;
 use craft\elements\Asset;
 use DateTime;
-use alttextlab\AltTextLab\AltTextLab;
 
 class AltTextLabAsset extends Model
 {
@@ -28,20 +28,35 @@ class AltTextLabAsset extends Model
         $asset = Asset::find()->id($this->assetId)->one();
         $settings = AltTextLab::getInstance()->getSettings();
 
-        if(isset($settings->customField) && ( $settings->customField == "alt" || $settings->customField == null ))
-        {
+        if ($asset) {
+            if (isset($settings->customField) && ($settings->customField == "alt" || $settings->customField == null)) {
 
-            $currentAltText =  $asset->alt;
-        }
-        elseif( $asset->getFieldLayout()->getFieldByHandle($settings->customField) )
-        {
+                $currentAltText = $asset->alt;
+            } elseif ($asset->getFieldLayout()->getFieldByHandle($settings->customField)) {
 
-            $currentAltText = $asset->getFieldValue($settings->customField);
-        }
-        else{
-            $currentAltText =  $asset->alt;
+                $currentAltText = $asset->getFieldValue($settings->customField);
+            } else {
+                $currentAltText = $asset->alt;
+            }
         }
 
         return $currentAltText ?? null;
+    }
+
+    public function getIsExistCurrentSelectedFieldInAsset()
+    {
+        $asset = Asset::find()->id($this->assetId)->one();
+        $settings = AltTextLab::getInstance()->getSettings();
+
+        if ($asset) {
+            if (isset($settings->customField) && ($settings->customField == "alt" || $settings->customField == null)) {
+                return true;
+            } elseif ($asset->getFieldLayout()->getFieldByHandle($settings->customField)) {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

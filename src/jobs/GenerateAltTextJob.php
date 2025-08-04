@@ -8,7 +8,7 @@ use alttextlab\AltTextLab\services\AltTextLabAssetsService;
 class GenerateAltTextJob extends BaseJob
 {
     public int $assetId;
-    public int $bulkGenerationId;
+    public ?int $bulkGenerationId = null;
 
     public function execute($queue): void
     {

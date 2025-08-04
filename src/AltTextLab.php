@@ -41,8 +41,8 @@ class AltTextLab extends Plugin
 
     protected function settingsHtml(): ?string
     {
-        $aiModels = require \Craft::$app->getPlugins()->getPlugin('alt-text-lab')->getBasePath() . '/configs/AiModels.php';
-        $languages = require \Craft::$app->getPlugins()->getPlugin('alt-text-lab')->getBasePath() . '/configs/Languages.php';
+        $aiModels = require Craft::$app->getPlugins()->getPlugin('alt-text-lab')->getBasePath() . '/configs/AiModels.php';
+        $languages = require Craft::$app->getPlugins()->getPlugin('alt-text-lab')->getBasePath() . '/configs/Languages.php';
 
         $apiService = new ApiService();
         $account = $apiService->GetAccount();
@@ -59,6 +59,8 @@ class AltTextLab extends Plugin
     private function attachEventHandlers(): void
     {
         $settings = $this->getSettings();
+        $apiService = new ApiService();
+        $account = $apiService->GetAccount();
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['alt-text-lab/history'] = 'alt-text-lab/history';
@@ -69,9 +71,10 @@ class AltTextLab extends Plugin
             $event->rules['alt-text-lab/log'] = 'alt-text-lab/log';
             $event->rules['alt-text-lab'] = 'alt-text-lab/dashboard';
             $event->rules['alt-text-lab/utility/change-asset-alt-text'] = 'alt-text-lab/utility/change-asset-alt-text';
+            $event->rules['alt-text-lab/bulk-generation-history/get-current-generation-data'] = 'alt-text-lab/bulk-generation-history/get-current-generation-data';
         });
 
-        if ($settings->onUploadGenerate) {
+        if ($settings->onUploadGenerate && $settings->apiKey && $account && $account['credits'] > 0) {
             Event::on(
                 Asset::class,
                 Asset::EVENT_AFTER_SAVE,
@@ -101,10 +104,10 @@ class AltTextLab extends Plugin
         $item = parent::getCpNavItem();
 
         $item['subnav']['settings'] = ['label' => 'Settings', 'url' => 'settings/plugins/alt-text-lab'];
-        $item['subnav']['bulk-generation'] = ['label' => 'Bulk generator', 'url' => 'alt-text-lab/bulk-generation'];
+        $item['subnav']['bulk-generation'] = ['label' => 'Bulk generation', 'url' => 'alt-text-lab/bulk-generation'];
         $item['subnav']['bulk-generation-history'] = ['label' => 'Bulk History', 'url' => 'alt-text-lab/bulk-generation-history'];
         $item['subnav']['history'] = ['label' => 'Successfully Generated', 'url' => 'alt-text-lab/history'];
-        $item['subnav']['log'] = ['label' => 'Failed Generated', 'url' => 'alt-text-lab/log'];
+        $item['subnav']['log'] = ['label' => 'Logs', 'url' => 'alt-text-lab/log'];
 
         return $item;
     }

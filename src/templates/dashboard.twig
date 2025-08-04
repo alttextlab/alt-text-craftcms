@@ -2,8 +2,33 @@
 {% extends "_layouts/cp" %}
 
 {% block content %}
+    <style>
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .alert-error {
+            border-color: #dc3545;
+            background: #fbeaea;
+        }
+
+    </style>
     <h1>
-        <svg width="151.2" height="17.6" viewBox="0 0 378 44" fill="none"
+        <svg width="136.08" height="15.84" viewBox="0 0 378 44" fill="none"
              xmlns="http://www.w3.org/2000/svg">
             <path d="M51.4922 0H60.825V43.5171H51.4922V0Z" fill="currentColor"/>
             <path d="M92.1792 41.948C91.1642 42.6773 90.0159 43.2002 88.7994 43.4868C87.4204 43.8337 86.0033 44.0061 84.5814 44C80.752 44 77.7904 43.0142 75.6965 41.0427C73.6029 39.0717 72.5558 36.175 72.5553 32.3526V15.621H67.5898V8.37926H72.5553V0H81.8889V8.37926H89.9063V15.621H81.8889V32.2323C81.8144 33.3839 82.1896 34.5194 82.9357 35.3999C83.3224 35.7848 83.7864 36.0833 84.2969 36.2757C84.8075 36.4682 85.353 36.5502 85.8976 36.5163C87.2547 36.5551 88.5845 36.1295 89.6669 35.3098L92.1792 41.948Z"
@@ -28,35 +53,57 @@
     <hr>
     <div>
         {% if not apiKey %}
-            <p>Get your API Key at <a href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=wp&utm_term=api-key-hint" target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
+            <div class="alert alert-warning">
+                <p>Get your API Key at <a
+                            href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=wp&utm_term=api-key-hint"
+                            target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
+            </div>
         {% elseif apiKey and not account %}
-            <p>Your API key is invalid. Please check your API key or <a href="https://app.alttextlab.com?utm_source=integration&utm_medium=wp&utm_term=invalid-api-key" target="_blank">create a new API key</a>.</p>
+            <div class="alert alert-error">
+                <p>Your API key is invalid. Please check your API key or <a
+                            href="https://app.alttextlab.com?utm_source=integration&utm_medium=wp&utm_term=invalid-api-key"
+                            target="_blank">create a new API key</a>.</p>
+            </div>
         {% else %}
             {% if account.isActive %}
-                <p> You’re on the <strong>{{ account.plan }} plan.</strong></p>
+                <div class="alert alert-success">
+                    <p> You’re on the <strong>{{ account.plan }} plan.</strong></p>
+                </div>
             {% else %}
-                <p><strong>You don’t have an active subscription.</strong></p>
+                <div class="alert alert-warning">
+                    <p><strong>You don’t have an active subscription.</strong></p>
+                </div>
             {% endif %}
 
             {% if account.isActive and account.credits == 0 %}
-                <p><strong>Alt text generation is currently disabled due to zero credits on your account.</strong></p>
+                <div class="alert alert-warning">
+                    <p><strong>Alt text generation is currently disabled due to zero credits on your account.</strong>
+                    </p>
+                </div>
             {% elseif not account.isActive %}
-                <p>Alt text generation is currently <strong>disabled.</strong></p>
+                <div class="alert alert-warning">
+                    <p>Alt text generation is currently <strong>disabled.</strong></p>
+                </div>
             {% endif %}
 
-            <p>Credits on your account: <strong>{{ account.credits }}</strong></p>
+            <div>
+                <div>Credits on your account: <strong>{{ account.credits }}</strong></div>
 
-            {% if account.isActive and account.nextReceiving and account.nextReceivingAt %}
-                {% set refillDate = account.nextReceivingAt|date('m.d.Y') %}
-                <p><strong>Next credits refill:</strong> {{ account.nextReceiving }} credits on
-                    <strong>{{ refillDate }}</strong></p>
-            {% endif %}
+                {% if account.isActive and account.nextReceiving and account.nextReceivingAt %}
+                    {% set refillDate = account.nextReceivingAt|date('m.d.Y') %}
+                    <div><strong>Next credits refill:</strong> {{ account.nextReceiving }} credits on <strong>{{ refillDate }}</strong></div>
+                {% endif %}
+            </div>
 
             {% if account.isActive %}
-                <p>You can <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits" target="_blank">upgrade
+                <p>You can <a
+                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                            target="_blank">upgrade
                         your plan</a> to get more credits.</p>
             {% else %}
-                <p>To unlock alt text generation, please <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits" target="_blank">
+                <p>To unlock alt text generation, please <a
+                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                            target="_blank">
                         activate a subscription plan</a></p>
             {% endif %}
         {% endif %}

@@ -28,7 +28,7 @@ class Install extends Migration
             [
                 'id' => $this->primaryKey(),
                 'assetId' => $this->integer()->notNull(),
-                'bulkGenerationId' => $this->integer()->notNull(),
+                'bulkGenerationId' => $this->integer(),
                 'responseId' => $this->string(128)->notNull(),
                 'generatedAltText' => $this->string(512)->defaultValue(null),
                 'dateCreated' => $this->dateTime()->notNull(),
@@ -58,7 +58,7 @@ class Install extends Migration
             [
                 'id' => $this->primaryKey(),
                 'assetId' => $this->integer()->notNull(),
-                'bulkGenerationId' => $this->integer()->notNull(),
+                'bulkGenerationId' => $this->integer(),
                 'logMessage' => $this->string(512)->defaultValue(null),
                 'dateCreated' => $this->dateTime()->notNull(),
             ]
@@ -89,10 +89,9 @@ class Install extends Migration
 
     public function safeDown(): bool
     {
-        // Place uninstallation code here...
         $this->dropTableIfExists(AltTextLabAsset::tableName);
-        $this->dropTableIfExists(AltTextLabBulkGeneration::tableName);
         $this->dropTableIfExists(AltTextLabLog::tableName);
+        $this->dropTableIfExists(AltTextLabBulkGeneration::tableName);
         return true;
     }
 

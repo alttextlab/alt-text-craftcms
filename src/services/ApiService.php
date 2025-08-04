@@ -2,9 +2,9 @@
 
 namespace alttextlab\AltTextLab\services;
 
+use alttextlab\AltTextLab\AltTextLab;
 use Craft;
 use Exception;
-use alttextlab\AltTextLab\AltTextLab;
 
 class ApiService
 {
@@ -72,7 +72,21 @@ class ApiService
                 'http_errors' => false
             ]);
 
-            return $response->getBody()->getContents();
+            $statusCode = $response->getStatusCode();
+            $responseBody = $response->getBody()->getContents();
+
+            $responseBodyJson = json_decode($responseBody, true);
+
+
+            if ($statusCode == 401) {
+                return 'API_KEY_IS_INVALID';
+            }
+
+            if ($statusCode == 403 && isset($responseBodyJson['key']) && $responseBodyJson['key'] === 'NOT_ENOUGH_FUNDS') {
+                return 'NOT_ENOUGH_FUNDS';
+            }
+
+            return $responseBody;
 
         } catch (Exception $e) {
             Craft::error('Alt text generation error: ' . $e->getMessage(), __METHOD__);

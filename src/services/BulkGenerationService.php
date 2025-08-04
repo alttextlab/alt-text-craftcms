@@ -43,7 +43,7 @@ class BulkGenerationService
         return  $model;
     }
 
-    public function getAll($filters = [])
+    public function getAll($filters = [], array $generationIds = [])
     {
         $recordsQuery = AltTextLabBulkGenerationRecord::find();
 
@@ -52,6 +52,10 @@ class BulkGenerationService
         }
         if (array_key_exists('offset', $filters)) {
             $recordsQuery->offset($filters['offset']);
+        }
+
+        if (!empty($generationIds)) {
+            $recordsQuery->where(['in', 'id', $generationIds]);
         }
 
         $recordsQuery->orderBy(['id' => SORT_DESC]);

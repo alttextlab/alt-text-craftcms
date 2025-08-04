@@ -22,7 +22,7 @@ class DashboardController extends Controller
         }
 
         $templateParams = [
-            'title' => 'Alt Text Lab',
+            'title' => 'Dashboard',
             'settings' => $settings,
             'apiKey' => $apiKey,
             'account' => $account,
