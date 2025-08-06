@@ -25,12 +25,12 @@
 
 <div style="margin-top: 5px">
     {% if settings.apiKey and not account %}
-        <p class="text-dunger">Your API key is invalid. Please check your API key or <a href="https://app.alttextlab.com?utm_source=integration&utm_medium=wp&utm_term=invalid-api-key" rel="noopener noreferrer" target="_blank"
+        <p class="text-dunger">Your API key is invalid. Please check your API key or <a href="https://app.alttextlab.com?utm_source=integration&utm_medium=craftcms&utm_term=invalid-api-key" rel="noopener noreferrer" target="_blank"
                                                                     class="">create a new API key</a>.</p>
     {% elseif settings.apiKey and account %}
         <p class="text-succes">Your API key is valid. Credits on your account: <strong>{{ account.credits }}</strong>.</p>
     {% else %}
-        <p>Get your API Key at <a href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=wp&utm_term=api-key-hint" rel="noopener noreferrer" target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
+        <p>Get your API Key at <a href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=craftcms&utm_term=api-key-hint" rel="noopener noreferrer" target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
     {% endif %}
 </div>
 

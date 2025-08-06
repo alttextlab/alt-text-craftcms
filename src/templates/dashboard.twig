@@ -25,6 +25,9 @@
             border-color: #dc3545;
             background: #fbeaea;
         }
+        .font-medium {
+            font-weight: 500;
+        }
 
     </style>
     <h1>
@@ -54,14 +57,20 @@
     <div>
         {% if not apiKey %}
             <div class="alert alert-warning">
-                <p>Get your API Key at <a
-                            href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=wp&utm_term=api-key-hint"
-                            target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
+                <p class="text-sm font-medium">
+                    {{ "Welcome to Alt Text Lab!"|t }}
+                </p>
+                <p class="text-sm text-amber-700">
+                    {{ "To start generating alt text, please set your API key in the plugin settings."|t }}
+                </p>
+                <a href="{{ url('settings/plugins/alt-text-lab') }}">
+                    {{ "Open Plugin Settings →"|t }}
+                </a>
             </div>
         {% elseif apiKey and not account %}
             <div class="alert alert-error">
                 <p>Your API key is invalid. Please check your API key or <a
-                            href="https://app.alttextlab.com?utm_source=integration&utm_medium=wp&utm_term=invalid-api-key"
+                            href="https://app.alttextlab.com?utm_source=integration&utm_medium=craftcms&utm_term=invalid-api-key"
                             target="_blank">create a new API key</a>.</p>
             </div>
         {% else %}
@@ -97,12 +106,12 @@
 
             {% if account.isActive %}
                 <p>You can <a
-                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits"
                             target="_blank">upgrade
                         your plan</a> to get more credits.</p>
             {% else %}
                 <p>To unlock alt text generation, please <a
-                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                            href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits"
                             target="_blank">
                         activate a subscription plan</a></p>
             {% endif %}

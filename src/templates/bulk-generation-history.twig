@@ -24,6 +24,11 @@
             border-color: #ffc107;
             background: #fff8e1;
         }
+
+        .alert-notification {
+            border-color: #1976d2;
+            background: #bbdefb;
+        }
     </style>
 
     <h2>Bulk generation history page</h2>
@@ -34,7 +39,7 @@
             track its progress.
         </div>
     {% else %}
-        <div class="alert alert-warning">
+        <div class="alert alert-notification">
             During active generations, data is automatically updated every <strong>5 seconds</strong> to reflect the
             current status of the alt text generation.
         </div>
@@ -62,7 +67,7 @@
                             <td class="text-center cell-total">{{ item.countOfImages }}</td>
                             <td class="text-center cell-completed">
                                 {{ completed }}/{{ item.countOfImages }}
-                                (<strong>{{ ((completed) / item.countOfImages * 100)|round(0, 'common') }}%</strong>)
+                                (<strong>{% if item.countOfImages %}{{ ((completed) / item.countOfImages * 100)|round(0, 'common') }}{% else %}100{% endif %}%</strong>)
                             </td>
                             <td class="text-center cell-success">
                                 {% if item.successfulCount > 0 %}

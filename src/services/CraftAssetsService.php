@@ -91,7 +91,9 @@ class CraftAssetsService
         }
 
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
-            $query->hasAlt($hasAltText);
+            if (!$hasAltText){
+                $query->hasAlt($hasAltText);
+            }
             $resultAssets = $query->all();
         } else {
             foreach ($query->each() as $asset) {
@@ -103,9 +105,9 @@ class CraftAssetsService
 
                 $value = trim((string)$asset->getFieldValue($altFieldHandle));
 
-                if ($hasAltText && $value !== '') {
+                if (!$hasAltText && $value === '') {
                     $resultAssets[] = $asset;
-                } elseif (!$hasAltText && $value === '') {
+                }else{
                     $resultAssets[] = $asset;
                 }
             }

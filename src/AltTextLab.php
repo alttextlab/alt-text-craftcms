@@ -79,7 +79,7 @@ class AltTextLab extends Plugin
                 Asset::class,
                 Asset::EVENT_AFTER_SAVE,
                 function (ModelEvent $event) {
-                    if ($event->sender->firstSave && $event->sender->alt == "") {
+                    if ($event->sender->enabled && $event->sender->getEnabledForSite() && $event->sender->firstSave && $event->sender->alt == "") {
                         $asset = $event->sender;
 
                         Queue::push(new GenerateAltTextJob([

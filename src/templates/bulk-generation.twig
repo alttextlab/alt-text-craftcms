@@ -105,25 +105,25 @@
             <div class="utility-form">
                 {% if not settings.apiKey %}
                     <div class="alert alert-warning">
-                        <p class="text-sm font-medium text-amber-700">
+                        <p class="text-sm font-medium">
                             {{ "Welcome to Alt Text Lab!"|t }}
                         </p>
-                        <p class="text-sm text-amber-700">
-                            {{ "To start generating alt text, please set your API key in the Settings page."|t }}
+                        <p class="text-sm">
+                            {{ "To start generating alt text, please set your API key in the plugin settings."|t }}
                         </p>
                         <a href="{{ url('settings/plugins/alt-text-lab') }}">
-                            {{ "Open Account Settings →"|t }}
+                            {{ "Open Plugin Settings →"|t }}
                         </a>
                     </div>
                 {% elseif not isValidAccount %}
                     <div class="alert alert-warning">
-                        <p class="text-sm text-amber-700">
+                        <p class="text-sm">
                             You have no more credits left.
                             {% if accountExist %}
                                 To bulk update your library, please
-                                <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits"
+                                <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits"
                                    target="_blank"
-                                   class="font-medium text-amber-700 underline hover:text-amber-600">
+                                   class="font-medium underline hover:text-amber-600">
                                     purchase more credits.
                                 </a>
                             {% endif %}
@@ -135,7 +135,7 @@
                             Available credits: {{ credits ?? 0 }}
                         </p>
                         {% if isValidAccount %}
-                            <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=wp&utm_term=get-credits" target="_blank"
+                            <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits" target="_blank"
                                class="text-xs whitespace-nowrap text-blue-500 hover:text-blue-600">
                                 Get more credits →
                             </a>

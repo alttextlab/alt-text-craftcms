@@ -8,7 +8,7 @@ use craft\helpers\App;
 class Settings extends Model
 {
     public ?string $apiKey = null;
-    public ?bool $onUploadGenerate = false;
+    public ?bool $onUploadGenerate = true;
     public ?string $customField = 'alt';
     public ?string $modelName = "describe-regular";
     public ?string $lang = "en";

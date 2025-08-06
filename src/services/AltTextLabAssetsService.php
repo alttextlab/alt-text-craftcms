@@ -14,6 +14,8 @@ use alttextlab\AltTextLab\AltTextLab;
 class AltTextLabAssetsService
 {
 
+    private $LOG_FAILED_MESSAGE = 'Something went wrong. Make sure your image is public, or disable 
+    “This site is reachable over the public internet” in Plugin Settings if your site is private or hosted locally.';
     private $logService;
     private $utilityService;
     private $apiService;
@@ -179,7 +181,7 @@ class AltTextLabAssetsService
             $responseArray = json_decode($responseArray, true);
 
             if (!isset($responseArray['result'])) {
-                $this->logService->log($asset->id, $bulkGenerationId, 'Something went wrong!');
+                $this->logService->log($asset->id, $bulkGenerationId, $this->LOG_FAILED_MESSAGE);
                 return;
             }
 
@@ -191,7 +193,7 @@ class AltTextLabAssetsService
             }
         } catch (\Throwable $e) {
             Craft::error('Alt text generation error: ' . $e->getMessage(), __METHOD__);
-            $this->logService->log($assetId, $bulkGenerationId, $e->getMessage());
+            $this->logService->log($assetId, $bulkGenerationId, $this->LOG_FAILED_MESSAGE);
         }
     }
 
@@ -239,6 +241,5 @@ class AltTextLabAssetsService
             $asset->alt = $altText;
         }
     }
-
 
 }

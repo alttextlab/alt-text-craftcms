@@ -100,14 +100,11 @@
                             {% if log.assetId %}
                                 {% set assetRow = craft.assets.id(log.assetId).one() %}
                                 {% if assetRow %}
-                                    {% if assetRow.canView(currentUser) %}
+                                    {% set imageUrl = assetRow.getUrl(thumb) ?? '' %}
+                                    {% if imageUrl %}
                                         <a href="{{ assetRow.cpEditUrl }}">
-                                            <img src="{{ assetRow.getUrl(thumb) }}" class="image-size"
-                                                 alt="{{ assetRow.alt }}"/>
+                                            <img src="{{ imageUrl }}" class="image-size" alt="{{ assetRow.alt }}" />
                                         </a>
-                                    {% else %}
-                                        <img src="{{ assetRow.getUrl(thumb) }}" class="image-size"
-                                             alt="{{ assetRow.alt }}"/>
                                     {% endif %}
                                 {% endif %}
                             {% endif %}
