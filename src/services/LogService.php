@@ -4,6 +4,7 @@ namespace alttextlab\AltTextLab\services;
 
 use alttextlab\AltTextLab\models\AltTextLabLog as AltTextLabLogModel;
 use alttextlab\AltTextLab\records\AltTextLabLog as AltTextLabLogRecord;
+use craft\elements\Asset;
 
 class LogService
 {
@@ -39,7 +40,7 @@ class LogService
         return  $model;
     }
 
-    public function getAllLogs($filters = []): array
+    public function getAllLogs($filters = [], &$thereIsWithoutURL): array
     {
         $recordsQuery = AltTextLabLogRecord::find();
 
@@ -62,6 +63,12 @@ class LogService
 
         foreach ($records as $record) {
             $model = new AltTextLabLogModel($record->getAttributes());
+
+            $asset = Asset::find()->id($model->assetId)->one();
+            if (!$asset || !$asset->getUrl()) {
+                $thereIsWithoutURL = true;
+            }
+
             $models[] = $model;
         }
 

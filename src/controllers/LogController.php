@@ -24,11 +24,13 @@ class LogController extends Controller
             $conditions['bulkGenerationId'] = $bulkId;
         }
 
+        $thereIsWithoutURL = false;
+
         $limit = $request->getQueryParam('limit', $settings->itemPerPage);
         $offset = $request->getQueryParam('offset', 0);
 
         $logTotalCount = $logService->getTotalCount($conditions);
-        $logs = $logService->getAllLogs(['limit' => $limit, 'offset' => $offset, 'bulkGenerationId' => $bulkId]);
+        $logs = $logService->getAllLogs(['limit' => $limit, 'offset' => $offset, 'bulkGenerationId' => $bulkId], $thereIsWithoutURL);
 
         $templateParams = [
             'title' => 'Logs',
@@ -39,7 +41,8 @@ class LogController extends Controller
             'offset' => $offset,
             'currentPage' => (int) floor($offset / $limit) + 1,
             'totalPages' => (int) ceil($logTotalCount / $limit),
-            'bulkId' => $bulkId
+            'bulkId' => $bulkId,
+            'thereIsWithoutURL' => $thereIsWithoutURL
         ];
 
         return $this->renderTemplate('alt-text-lab/log.twig', $templateParams);

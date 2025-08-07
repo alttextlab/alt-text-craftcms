@@ -27,7 +27,7 @@ class AltTextLabAssetsService
         $this->apiService = new ApiService();
     }
 
-    public function getAllAssets($filters = [])
+    public function getAllAssets($filters = [], &$thereIsWithoutURL)
     {
         $recordsQuery = AltTextLabAssetRecord::find();
 
@@ -50,6 +50,12 @@ class AltTextLabAssetsService
 
         foreach ($records as $record) {
             $model = new AltTextLabAssetModel($record->getAttributes());
+
+            $asset = Asset::find()->id($model->assetId)->one();
+            if (!$asset || !$asset->getUrl()) {
+                $thereIsWithoutURL = true;
+            }
+
             $models[] = $model;
         }
 

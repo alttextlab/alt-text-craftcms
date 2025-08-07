@@ -31,8 +31,11 @@
             color: #856404;
         }
 
-        .text-muted {
+        .text-muted-color{
             color: #6c757d;
+        }
+
+        .text-muted {
             cursor: not-allowed;
             text-decoration: none;
         }
@@ -43,11 +46,6 @@
             border-left: 4px solid #ccc;
             background: #f9f9f9;
             border-radius: 4px;
-        }
-
-        .alert-success {
-            border-color: #28a745;
-            background: #e9f7ef;
         }
 
         .alert-warning {
@@ -71,6 +69,11 @@
             No alt text has been generated for any assets yet. Once it's available, it will appear here.
         </div>
     {% else %}
+
+        {% if thereIsWithoutURL %}
+            {% include "alt-text-lab/includes/no-url-notofocation" %}
+        {% endif %}
+
         <div class="space-block"></div>
         <div class="tableview tablepane">
             <table class="data fullwidth">
@@ -93,12 +96,20 @@
                                 {% set assetRow = craft.assets.id(asset.assetId).one() %}
                                 {% if assetRow %}
                                     {% set imageUrl = assetRow.getUrl(thumb) ?? '' %}
+                                    {% set editUrl = assetRow.cpEditUrl ?? '' %}
+
                                     {% if imageUrl %}
-                                        <a href="{{ assetRow.cpEditUrl }}">
+                                        <a href="{{ editUrl }}">
                                             <img src="{{ imageUrl }}" class="image-size" alt="{{ assetRow.alt }}" />
-                                        </a>
+                                        </a>                                    {% elseif editUrl %}
+                                        <a href="{{ editUrl }}">View asset</a>
+                                    {% else %}
+                                        <span class="text-muted text-muted-color">Asset not available</span>
                                     {% endif %}
+                                {% else %}
+                                    <span class="text-muted text-muted-color">No asset found</span>
                                 {% endif %}
+
                             {% endif %}
                         </td>
                         <td>

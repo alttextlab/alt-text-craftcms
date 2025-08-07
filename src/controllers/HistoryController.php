@@ -23,11 +23,13 @@ class HistoryController extends Controller
             $conditions['bulkGenerationId'] = $bulkId;
         }
 
+        $thereIsWithoutURL = false;
+
         $limit = $request->getQueryParam('limit', $settings->itemPerPage);
         $offset = $request->getQueryParam('offset', 0);
 
         $assetsTotalCount = $assetsService->getTotalCount($conditions);
-        $assets = $assetsService->getAllAssets(['limit' => $limit, 'offset' => $offset, 'bulkGenerationId' => $bulkId]);
+        $assets = $assetsService->getAllAssets(['limit' => $limit, 'offset' => $offset, 'bulkGenerationId' => $bulkId], $thereIsWithoutURL);
 
         $templateParams = [
             'title' => 'History',
@@ -39,6 +41,7 @@ class HistoryController extends Controller
             'currentPage' => (int) floor($offset / $limit) + 1,
             'totalPages' => (int) ceil($assetsTotalCount / $limit),
             'bulkId' => $bulkId,
+            'thereIsWithoutURL' => $thereIsWithoutURL
         ];
 
         return $this->renderTemplate('alt-text-lab/history.twig', $templateParams);
