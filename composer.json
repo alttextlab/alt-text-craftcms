@@ -2,7 +2,7 @@
   "name": "alttextlab/alt-text-craftcms",
   "description": "AI Alt Text generator for CraftCMS",
   "type": "craft-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "ai",
     "alt-text",
