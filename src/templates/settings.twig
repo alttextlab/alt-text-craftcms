@@ -1,0 +1,102 @@
+{% set selectedSubnavItem = 'Settings' %}
+
+{% import '_includes/forms.twig' as forms %}
+
+<style>
+    .text-dunger{
+        color: red;
+    }
+
+    .text-succes{
+        color: green;
+    }
+</style>
+
+<div id="url-settings" class="nested-fields ">
+    {{ forms.textField({
+        label: "AltTextLab API Key",
+        id: 'apiKey',
+        class: 'ltr',
+        name: 'apiKey',
+        value: settings.apiKey,
+        errors: settings.getErrors('apiKey')
+    }) }}
+</div>
+
+<div style="margin-top: 5px">
+    {% if settings.apiKey and not account %}
+        <p class="text-dunger">Your API key is invalid. Please check your API key or <a href="https://app.alttextlab.com?utm_source=integration&utm_medium=craftcms&utm_term=invalid-api-key" rel="noopener noreferrer" target="_blank"
+                                                                    class="">create a new API key</a>.</p>
+    {% elseif settings.apiKey and account %}
+        <p class="text-succes">Your API key is valid. Credits on your account: <strong>{{ account.credits }}</strong>.</p>
+    {% else %}
+        <p>Get your API Key at <a href="https://app.alttextlab.com/settings/api-keys?utm_source=integration&utm_medium=craftcms&utm_term=api-key-hint" rel="noopener noreferrer" target="_blank">AltTextLab.com</a> > API Keys > Create API key</p>
+    {% endif %}
+</div>
+
+{{ forms.lightswitchField({
+    label: "Auto-generate alt text for new assets",
+    instructions: "",
+    id: 'onUploadGenerate',
+    name: 'onUploadGenerate',
+    on: settings.onUploadGenerate
+}) }}
+
+{% set volumes = craft.app.getVolumes().getAllVolumes() %}
+{% set customFields = [] %}
+{% set customField = {
+    label: 'Alt (default)',
+    value: 'alt'
+} %}
+{% set customFields = customFields|merge([customField]) %}
+{% for volume in volumes %}
+    {% set layout = volume.fieldLayout() %}
+    {% for field in layout.getCustomFields() %}
+        {% if field.className == "craft\\fields\\PlainText" %}
+            {% set customField = {
+                label: field.name,
+                value: field.handle
+            } %}
+
+            {% set customFields = customFields|merge([customField]) %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+
+
+{{ forms.selectField({
+    label: "Field for Alt Text",
+    instructions: "You'll need to resync your assets after changing this setting.",
+    options: customFields,
+    id: 'customField',
+    name: 'customField',
+    value: settings.customField ?? 'alt',
+    errors: settings.getErrors('customField')
+}) }}
+
+{{ forms.selectField({
+    label: "Model type",
+    options: modelOptions,
+    id: 'modelName',
+    name: 'modelName',
+    value: settings.modelName ?? 'describe-regular',
+    errors: settings.getErrors('modelName')
+}) }}
+
+
+{{ forms.selectField({
+    label: "Language",
+    options: languages,
+    id: 'lang',
+    name: 'lang',
+    value: settings.lang ?? 'en',
+    errors: settings.getErrors('lang')
+}) }}
+
+{{ forms.lightswitchField({
+    label: "This site is reachable over the public internet",
+    instructions: "",
+    id: 'isPublic',
+    name: 'isPublic',
+    on: settings.isPublic
+}) }}
