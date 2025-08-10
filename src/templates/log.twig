@@ -1,0 +1,150 @@
+{% set selectedSubnavItem = 'log' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <style>
+        .space-block {
+            width: 100%;
+            height: 20px;
+        }
+
+        .image-size {
+            width: 75px;
+            height: 75px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .alert-error {
+            border-color: #dc3545;
+            background: #fbeaea;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .alert-error {
+            border-color: #dc3545;
+            background: #fbeaea;
+        }
+
+        .text-muted-color{
+            color: #6c757d;
+        }
+
+        .text-muted {
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+    </style>
+
+    <h2>Log page</h2>
+
+    {% set thumb = {
+        mode: 'crop',
+        width: 75,
+        height: 75,
+        quality: 75,
+        position: 'top-center'
+    } %}
+
+    {% if totalCount == 0 %}
+        <div class="alert alert-warning">
+            No logs have been recorded yet. They will appear here once available.
+        </div>
+    {% else %}
+
+        {% if thereIsWithoutURL %}
+            {% include "alt-text-lab/includes/no-url-notofocation" %}
+        {% endif %}
+
+
+        <div class="space-block"></div>
+        <div class="tableview tablepane">
+            <table class="data fullwidth">
+                <thead>
+                <tr>
+                    <th class="text-center">Id</th>
+                    <th>Asset</th>
+                    <th>Message</th>
+                    <th class="text-center">Log date</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td class="text-center">{{ log.id }}</td>
+                        <td>
+                            {% if log.assetId %}
+                                {% set assetRow = craft.assets.id(log.assetId).one() %}
+                                {% if assetRow %}
+                                    {% set imageUrl = assetRow.getUrl(thumb) ?? '' %}
+                                    {% set editUrl = assetRow.cpEditUrl ?? '' %}
+
+                                    {% if imageUrl %}
+                                        <a href="{{ editUrl }}">
+                                            <img src="{{ imageUrl }}" class="image-size" alt="{{ assetRow.alt }}" />
+                                        </a>                                    {% elseif editUrl %}
+                                        <a href="{{ editUrl }}">View asset</a>
+                                    {% else %}
+                                        <span class="text-muted text-muted-color">Asset not available</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted text-muted-color">No asset found</span>
+                                {% endif %}
+
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log %}
+                                {{ log.logMessage }}
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if log %}
+                                {{ log.dateCreated|date('Y-m-d H:i') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% include "alt-text-lab/includes/pagination-panel" %}
+        </div>
+    {% endif %}
+{% endblock %}

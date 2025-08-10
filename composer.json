@@ -1,0 +1,42 @@
+{
+  "name": "alttextlab/alt-text-craftcms",
+  "description": "AI Alt Text generator for CraftCMS",
+  "type": "craft-plugin",
+  "version": "1.0.0",
+  "keywords": [
+    "ai",
+    "alt-text",
+    "seo",
+    "accessibility",
+    "craftcms",
+    "craft-plugin"
+  ],
+  "support": {
+    "docs": "https://github.com/alttextlab/alt-text-craftcms",
+    "issues": "https://github.com/alttextlab/alt-text-craftcms/issues",
+    "source": "https://github.com/alttextlab/alt-text-craftcms"
+  },
+  "license": "proprietary",
+  "authors": [
+      {
+      "name": "AltTextLab",
+      "homepage": "https://www.alttextlab.com"
+      }
+  ],
+  "require": {
+    "craftcms/cms": "^5.0",
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "alttextlab\\AltTextLab\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "alt-text-lab",
+    "name": "AltTextLab",
+    "developer": "AltTextLab",
+    "developerUrl": "https://alttextlab.com",
+    "class": "alttextlab\\AltTextLab\\AltTextLab"
+  }
+}

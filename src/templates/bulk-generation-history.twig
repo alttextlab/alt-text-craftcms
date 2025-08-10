@@ -1,0 +1,184 @@
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'bulk-generation-history' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <style>
+        .text-center {
+            text-align: center;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 3rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        mt-1 {
+            margin-top: 1rem;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .alert-notification {
+            border-color: #1976d2;
+            background: #bbdefb;
+        }
+    </style>
+
+    <h2>Bulk generation history page</h2>
+
+    {% if totalCount == 0 %}
+        <div class="alert alert-warning">
+            No bulk alt text generation has been started yet. Once initiated, it will appear here and you’ll be able to
+            track its progress.
+        </div>
+    {% else %}
+        <div class="alert alert-notification">
+            During active generations, data is automatically updated every <strong>5 seconds</strong> to reflect the
+            current status of the alt text generation.
+        </div>
+        <div class="tableview tablepane">
+            <table class="data fullwidth">
+                <thead>
+                <tr>
+                    <th class="text-center">Id</th>
+                    <th class="text-center">Images to generate</th>
+                    <th class="text-center">Completed</th>
+                    <th class="text-center">Successfully Generated</th>
+                    <th class="text-center">Failed to Generate</th>
+                    <th>Generation date</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in bulkGenerationItems %}
+                    {% if item %}
+                        {% set completed = item.successfulCount + item.failedCount %}
+                        <tr class="bulk-row"
+                            data-id="{{ item.id }}"
+                            data-total="{{ item.countOfImages }}"
+                            data-completed="{{ completed }}">
+                            <td class="text-center cell-id">{{ item.id }}</td>
+                            <td class="text-center cell-total">{{ item.countOfImages }}</td>
+                            <td class="text-center cell-completed">
+                                {{ completed }}/{{ item.countOfImages }}
+                                (<strong>{% if item.countOfImages %}{{ ((completed) / item.countOfImages * 100)|round(0, 'common') }}{% else %}100{% endif %}%</strong>)
+                            </td>
+                            <td class="text-center cell-success">
+                                {% if item.successfulCount > 0 %}
+                                    <a href="{{ url('alt-text-lab/history', { bulkId: item.id }) }}">{{ item.successfulCount }}</a>
+                                {% else %}
+                                    <span>{{ item.successfulCount }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center cell-failed">
+                                {% if item.failedCount > 0 %}
+                                    <a href="{{ url('alt-text-lab/log', { bulkId: item.id }) }}">{{ item.failedCount }}</a>
+                                {% else %}
+                                    <span>{{ item.failedCount }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ item.dateCreated|date('Y-m-d H:i') }}
+                            </td>
+                        </tr> {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+            {% include "alt-text-lab/includes/pagination-panel" %}
+        </div>
+    {% endif %}
+    <script>
+
+        const historyBaseUrl = '{{ url("alt-text-lab/history") }}';
+        const logBaseUrl = '{{ url("alt-text-lab/log") }}';
+
+        let intervalId = null;
+
+        function fetchData() {
+            const notCompletedIds = getNotCompletedGenerations();
+
+            if (notCompletedIds.length === 0) {
+                clearInterval(intervalId);
+                return;
+            }
+
+            fetch(Craft.getCpUrl('alt-text-lab/bulk-generation-history/get-current-generation-data'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': Craft.csrfTokenValue
+                },
+                body: JSON.stringify({ids: notCompletedIds})
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Error log status: ' + response.status);
+                }
+                return response.json();
+            })
+                .then(data => {
+                    if (data.success && Array.isArray(data.data)) {
+                        data.data.forEach(item => {
+                            const row = document.querySelector(`.bulk-row[data-id="${item.id}"]`);
+                            if (row) {
+                                updateRowContent(row, item);
+                            }
+                        });
+                    }
+                }).catch(error => {
+                console.error('Error log:', error);
+            });
+
+        }
+
+        function getNotCompletedGenerations() {
+            const incompleteIds = [];
+
+            document.querySelectorAll('.bulk-row').forEach(row => {
+                const id = parseInt(row.dataset.id);
+                const total = parseInt(row.dataset.total);
+                const completed = parseInt(row.dataset.completed);
+
+                if (completed < total) {
+                    incompleteIds.push(id);
+                }
+            });
+
+            return incompleteIds;
+        }
+
+        function updateRowContent(row, item) {
+            const completed = item.successfulCount + item.failedCount;
+            const percent = Math.round((completed / item.countOfImages) * 100);
+
+            row.dataset.completed = completed;
+
+            const completedCell = row.querySelector('.cell-completed');
+            const successCell = row.querySelector('.cell-success');
+            const failedCell = row.querySelector('.cell-failed');
+
+            if (completedCell) {
+                completedCell.innerHTML = `${completed}/${item.countOfImages} (<strong>${percent}%</strong>)`;
+            }
+
+            if (successCell) {
+                successCell.innerHTML = item.successfulCount > 0
+                    ? `<a href="${historyBaseUrl}?bulkId=${item.id}">${item.successfulCount}</a>`
+                    : `<span>${item.successfulCount}</span>`;
+            }
+
+            if (failedCell) {
+                failedCell.innerHTML = item.failedCount > 0
+                    ? `<a href="${logBaseUrl}?bulkId=${item.id}">${item.failedCount}</a>`
+                    : `<span>${item.failedCount}</span>`;
+            }
+        }
+
+        intervalId = setInterval(fetchData, 5000);
+    </script>
+{% endblock %}

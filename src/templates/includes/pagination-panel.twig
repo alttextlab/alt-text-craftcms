@@ -1,0 +1,99 @@
+<style>
+    .pagination-wrapper {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination ul {
+        display: inline-flex;
+        gap: 6px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .pagination li {
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .pagination li.clickable {
+        cursor: pointer;
+    }
+
+    .pagination li.clickable:hover {
+        background-color: #f0f0f0;
+    }
+
+    .pagination li.active {
+        background-color: #98afc8;
+    }
+
+    .pagination li.active a {
+        color: white;
+    }
+
+    .pagination a {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .pagination li.ellipsis {
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+    }
+</style>
+{% set range = 2 %}
+
+{% set startPage = currentPage - range %}
+
+        {% set endPage = currentPage + range %}
+        {% set bulkId = bulkId ?? null %}
+        {% if totalPages > 1 %}
+            <div class="pagination-wrapper">
+                <nav class="pagination">
+                    <ul>
+                        {% if currentPage > 1 %}
+                            <li class="clickable">
+                                <a href="?offset={{ (currentPage - 2) * limit }}&limit={{ limit }}{% if bulkId %}&bulkId={{ bulkId }}{% endif %}">&laquo;</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="{% if currentPage == 1 %}active{% else %}clickable{% endif %}">
+                            <a href="?offset=0&limit={{ limit }}{% if bulkId %}&bulkId={{ bulkId }}{% endif %}">1</a>
+                        </li>
+
+                        {% if startPage > 2 %}
+                            <li class="ellipsis">…</li>
+                        {% endif %}
+
+                        {% for page in startPage..endPage %}
+                            {% if page > 1 and page < totalPages %}
+                                <li class="{% if page == currentPage %}active{% else %}clickable{% endif %}">
+                                    <a href="?offset={{ (page - 1) * limit }}&limit={{ limit }}{% if bulkId %}&bulkId={{ bulkId }}{% endif %}">{{ page }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if endPage < totalPages - 1 %}
+                            <li class="ellipsis">…</li>
+                        {% endif %}
+
+                        {% if totalPages > 1 %}
+                            <li class="{% if currentPage == totalPages %}active{% else %}clickable{% endif %}">
+                                <a href="?offset={{ (totalPages - 1) * limit }}&limit={{ limit }}{% if bulkId %}&bulkId={{ bulkId }}{% endif %}">{{ totalPages }}</a>
+                            </li>
+                        {% endif %}
+
+                        {% if currentPage < totalPages %}
+                            <li class="clickable">
+                                <a href="?offset={{ currentPage * limit }}&limit={{ limit }}{% if bulkId %}&bulkId={{ bulkId }}{% endif %}">&raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}

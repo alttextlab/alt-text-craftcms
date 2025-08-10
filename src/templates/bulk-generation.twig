@@ -1,0 +1,199 @@
+{% import "_includes/forms" as forms %}
+{% set selectedSubnavItem = 'bulk-generation' %}
+{% extends "_layouts/cp" %}
+
+{% block content %}
+    <style>
+        .alt-section {
+            padding: 20px;
+        }
+
+        .alt-section h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .alt-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .alt-cards-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .alt-card {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .alt-card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .alt-card .alt-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .utility-form {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        @media (max-width: 768px) {
+            .alt-cards-row {
+                flex-direction: column;
+            }
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            border-color: #28a745;
+            background: #e9f7ef;
+        }
+
+        .alert-warning {
+            border-color: #ffc107;
+            background: #fff8e1;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+    </style>
+
+    <div class="alt-section">
+        <h1>Alt Text Bulk Generation</h1>
+
+        <div class="alt-cards-container">
+            <div class="alt-cards-row">
+                <div class="alt-card">
+                    <h2>Count of images</h2>
+                    <div class="alt-number">{{ totalCountOfImages }}</div>
+                </div>
+
+                <div class="alt-card">
+                    <h2>Images without alt text</h2>
+                    <div class="alt-number">{{ assetsWithoutAlt }}</div>
+                </div>
+            </div>
+
+            <div class="utility-form">
+                {% if not settings.apiKey %}
+                    <div class="alert alert-warning">
+                        <p class="text-sm font-medium">
+                            {{ "Welcome to Alt Text Lab!"|t }}
+                        </p>
+                        <p class="text-sm">
+                            {{ "To start generating alt text, please set your API key in the plugin settings."|t }}
+                        </p>
+                        <a href="{{ url('settings/plugins/alt-text-lab') }}">
+                            {{ "Open Plugin Settings →"|t }}
+                        </a>
+                    </div>
+                {% elseif not isValidAccount %}
+                    <div class="alert alert-warning">
+                        <p class="text-sm">
+                            You have no more credits left.
+                            {% if accountExist %}
+                                To bulk update your library, please
+                                <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits"
+                                   target="_blank"
+                                   class="font-medium underline hover:text-amber-600">
+                                    purchase more credits.
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <p class="text-sm font-medium mt-0 mb-0">
+                            Available credits: {{ credits ?? 0 }}
+                        </p>
+                        {% if isValidAccount %}
+                            <a href="https://app.alttextlab.com/settings/subscription?utm_source=integration&utm_medium=craftcms&utm_term=get-credits" target="_blank"
+                               class="text-xs whitespace-nowrap text-blue-500 hover:text-blue-600">
+                                Get more credits →
+                            </a>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <form class="utility" method="post" accept-charset="UTF-8">
+                        {{ actionInput('alt-text-lab/bulk-generation-queue') }}
+                        {{ csrfInput() }}
+
+                        {{ forms.checkbox({
+                            name: 'OverwriteAltText',
+                            id: 'OverwriteAltText',
+                            label: 'Overwrite Alt Text',
+                        }) }}
+
+                        <br/>
+                        <p id="generation-target-info" style="margin-top: 10px; font-weight: 500;"></p>
+                        <div class="buttons">
+                            <button type="submit" class="btn submit"
+                                    id="generation-button">{{ 'Run generation' }}</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('OverwriteAltText');
+            const button = document.getElementById('generation-button');
+            const infoText = document.getElementById('generation-target-info');
+
+            const total = {{ totalCountOfImages|json_encode }};
+            const withoutAlt = {{ assetsWithoutAlt|json_encode }};
+
+            function updateInfo() {
+                const targetCount = checkbox.checked ? total : withoutAlt;
+
+                if (checkbox.checked) {
+                    infoText.textContent = `Alt text will be generated for ${targetCount} images (including ones that already have alt text).`;
+                } else {
+                    infoText.textContent = `Alt text will be generated only for ${targetCount} images without alt text.`;
+                }
+
+                if (targetCount === 0) {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                }
+            }
+
+            updateInfo();
+            checkbox.addEventListener('change', updateInfo);
+        });
+
+    </script>
+
+{% endblock %}
