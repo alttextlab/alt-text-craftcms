@@ -34,7 +34,7 @@
   },
   "extra": {
     "handle": "alt-text-lab",
-    "name": "AltTextLab",
+    "name": "AI Alt Text Generator",
     "developer": "AltTextLab",
     "developerUrl": "https://alttextlab.com",
     "class": "alttextlab\\AltTextLab\\AltTextLab"
