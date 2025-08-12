@@ -1,3 +1,9 @@
+1.0.2 - 2025-08-12
+update readme
+
+1.0.2 - 2025-08-11
+small fixes
+
 1.0.1 - 2025-08-10
 small fixes
 

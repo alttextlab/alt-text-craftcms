@@ -2,6 +2,8 @@
 
 The **[AI Alt Text Generator](https://alttextlab.com?utm_source=craftcms-directory&utm_medium=craftcms-overview-block) for CraftCMS** is a plugin that automatically creates high-quality, descriptive alt text for images in your CraftCMS media library. Powered by the [AltTextLab](https://alttextlab.com) API, it uses advanced AI to generate accessible and SEO-friendly image descriptions, saving you time and improving your website’s accessibility compliance.
 
+**[GitHub Repository](https://github.com/alttextlab/alt-text-craftcms)** - **[Plugin Store](https://plugins.craftcms.com/alt-text-lab)**
+
 ## Features
 
 - **Automatic alt text generation** – Instantly generate alt text for newly uploaded images without any manual work.
@@ -18,7 +20,7 @@ This plugin requires:
 
 ## Installation
 
-You can install this plugin from the Plugin Store or with Composer.
+You can install this plugin from the [Plugin Store](https://plugins.craftcms.com/alt-text-lab) or with Composer.
 
 ## Setup Alt Text Generator
 
