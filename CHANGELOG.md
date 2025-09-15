@@ -1,4 +1,7 @@
-1.0.2 - 2025-08-12
+1.1.0 - 2025-09-15
+fix SQL error when clearing garbage
+
+1.0.3 - 2025-08-12
 update readme
 
 1.0.2 - 2025-08-11
