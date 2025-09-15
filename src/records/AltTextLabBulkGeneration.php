@@ -6,11 +6,11 @@ use craft\db\ActiveRecord;
 
 class AltTextLabBulkGeneration extends ActiveRecord
 {
-    public const tableName = '{{%alt-text-lab_bulk_generation}}';
+    public const tableName = '{{%alttextlab_bulk_generation}}';
 
     public static function tableName(): string
     {
-        return '{{%alt-text-lab_bulk_generation}}';
+        return '{{%alttextlab_bulk_generation}}';
     }
 
 }
