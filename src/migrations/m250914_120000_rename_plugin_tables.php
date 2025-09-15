@@ -14,7 +14,6 @@ class m250914_120000_rename_plugin_tables extends Migration
 
     public function safeUp(): bool
     {
-
         foreach ($this->tables as $oldName => $newName) {
             $old = Craft::$app->db->tablePrefix . $oldName;
             $new = Craft::$app->db->tablePrefix . $newName;
@@ -23,7 +22,6 @@ class m250914_120000_rename_plugin_tables extends Migration
                 $this->renameTable($old, $new);
             }
         }
-
         return true;
     }
 
