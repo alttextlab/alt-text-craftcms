@@ -7,11 +7,11 @@ use craft\db\ActiveRecord;
 class AltTextLabLog extends ActiveRecord
 {
 
-    public const tableName = '{{%alt-text-lab_log}}';
+    public const tableName = '{{%alttextlab_log}}';
 
     public static function tableName(): string
     {
-        return '{{%alt-text-lab_log}}';
+        return '{{%alttextlab_log}}';
     }
 
 }
