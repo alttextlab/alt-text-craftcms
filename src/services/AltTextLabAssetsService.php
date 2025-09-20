@@ -161,11 +161,16 @@ class AltTextLabAssetsService
                 return;
             }
 
-            if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
+            $settings = AltTextLab::getInstance()->getSettings();
+            $disabled = $settings->disabledVolumeUids ?? [];
+            $assetVolumeUid = $asset->getVolume()->uid ?? null;
+            if ($assetVolumeUid && in_array($assetVolumeUid, $disabled, true)) {
                 return;
             }
 
-            $settings = AltTextLab::getInstance()->getSettings();
+            if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
+                return;
+            }
 
             $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings);
             if (!$callDetails) {

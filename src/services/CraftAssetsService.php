@@ -2,6 +2,7 @@
 
 namespace alttextlab\AltTextLab\services;
 
+use Craft;
 use alttextlab\AltTextLab\AltTextLab;
 use craft\elements\Asset as AssetElement;
 
@@ -16,6 +17,11 @@ class CraftAssetsService
 
         $query = AssetElement::find()
             ->kind('image');
+
+        $disabledIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledIds)) {
+            $query->volumeId(['not', ...$disabledIds]);
+        }
 
         if (!empty($assetIds)) {
             $query->id($assetIds);
@@ -47,6 +53,11 @@ class CraftAssetsService
 
         $assetsQuery = AssetElement::find()
             ->kind('image');
+
+        $disabledIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledIds)) {
+            $assetsQuery->volumeId(['not', ...$disabledIds]);
+        }
 
         if (!empty($assetIds)) {
             $assetsQuery->id($assetIds);
@@ -84,6 +95,11 @@ class CraftAssetsService
         $query = AssetElement::find()
             ->kind('image');
 
+        $disabledIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledIds)) {
+            $query->volumeId(['not', ...$disabledIds]);
+        }
+
         $resultAssets = array();
 
         if (!empty($assetIds)) {
@@ -114,6 +130,25 @@ class CraftAssetsService
         }
 
         return $resultAssets;
+    }
+
+    private function getVolumesDisabledIds()
+    {
+        $disabledIds = [];
+        $settings = AltTextLab::getInstance()->getSettings();
+
+        $disabledUids = $settings->disabledVolumeUids ?? [];
+        if (!empty($disabledUids)) {
+            $volService = Craft::$app->getVolumes();
+
+            foreach ($disabledUids as $uid) {
+                if ($volume = $volService->getVolumeByUid($uid)) {
+                    $disabledIds[] = $volume->id;
+                }
+            }
+        }
+
+        return $disabledIds;
     }
 
 }
