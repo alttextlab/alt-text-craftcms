@@ -10,6 +10,17 @@
     .text-succes{
         color: green;
     }
+    #disabledVolumeUids-field .checkbox-select {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+    }
+
+    #disabledVolumeUids-field .checkbox-select .checkbox {
+        display: inline-flex;
+        align-items: center;
+        margin: 0;
+    }
 </style>
 
 <div id="url-settings" class="nested-fields ">
@@ -72,6 +83,20 @@
     name: 'customField',
     value: settings.customField ?? 'alt',
     errors: settings.getErrors('customField')
+}) }}
+
+{% set volumeOptions = [] %}
+{% for volume in volumes %}
+    {% set volumeOptions = volumeOptions|merge([{ label: volume.name, value: volume.uid }]) %}
+{% endfor %}
+
+{{ forms.checkboxSelectField({
+    label: "Disable volumes",
+    instructions: "Assets in these volumes will be excluded from alt text generation.",
+    id: 'disabledVolumeUids',
+    name: 'disabledVolumeUids',
+    options: volumeOptions,
+    values: settings.disabledVolumeUids ?? []
 }) }}
 
 {{ forms.selectField({
