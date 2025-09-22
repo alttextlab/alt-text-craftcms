@@ -96,12 +96,12 @@ class AltTextLab extends Plugin
             Element::EVENT_REGISTER_ACTIONS,
             function (RegisterElementActionsEvent $event) {
                 $settings = $this->getSettings();
-                $disabled = $settings->disabledVolumeUids ?? [];
+                $disabledVolumeUids = $settings->disabledVolumeUids ?? [];
                 $source = $event->source;
 
                 if (is_string($source) && str_starts_with($source, 'volume:')) {
                     $uid = substr($source, strlen('volume:'));
-                    if (in_array($uid, $disabled, true)) {
+                    if (in_array($uid, $disabledVolumeUids, true)) {
                         return;
                     }
                 }

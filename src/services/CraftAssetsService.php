@@ -18,9 +18,9 @@ class CraftAssetsService
         $query = AssetElement::find()
             ->kind('image');
 
-        $disabledIds = $this->getVolumesDisabledIds();
-        if (!empty($disabledIds)) {
-            $query->volumeId(['not', ...$disabledIds]);
+        $disabledVolumeIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledVolumeIds)) {
+            $query->volumeId(['not', ...$disabledVolumeIds]);
         }
 
         if (!empty($assetIds)) {
@@ -54,9 +54,9 @@ class CraftAssetsService
         $assetsQuery = AssetElement::find()
             ->kind('image');
 
-        $disabledIds = $this->getVolumesDisabledIds();
-        if (!empty($disabledIds)) {
-            $assetsQuery->volumeId(['not', ...$disabledIds]);
+        $disabledVolumeIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledVolumeIds)) {
+            $assetsQuery->volumeId(['not', ...$disabledVolumeIds]);
         }
 
         if (!empty($assetIds)) {
@@ -95,9 +95,9 @@ class CraftAssetsService
         $query = AssetElement::find()
             ->kind('image');
 
-        $disabledIds = $this->getVolumesDisabledIds();
-        if (!empty($disabledIds)) {
-            $query->volumeId(['not', ...$disabledIds]);
+        $disabledVolumeIds = $this->getVolumesDisabledIds();
+        if (!empty($disabledVolumeIds)) {
+            $query->volumeId(['not', ...$disabledVolumeIds]);
         }
 
         $resultAssets = array();
@@ -134,21 +134,21 @@ class CraftAssetsService
 
     private function getVolumesDisabledIds()
     {
-        $disabledIds = [];
+        $disabledVolumeIds = [];
         $settings = AltTextLab::getInstance()->getSettings();
 
-        $disabledUids = $settings->disabledVolumeUids ?? [];
-        if (!empty($disabledUids)) {
+        $disabledVolumeUid = $settings->disabledVolumeUids ?? [];
+        if (!empty($disabledVolumeUid)) {
             $volService = Craft::$app->getVolumes();
 
-            foreach ($disabledUids as $uid) {
-                if ($volume = $volService->getVolumeByUid($uid)) {
-                    $disabledIds[] = $volume->id;
+            foreach ($disabledVolumeUid as $disabledVolumeUid) {
+                if ($volume = $volService->getVolumeByUid($disabledVolumeUid)) {
+                    $disabledVolumeIds[] = $volume->id;
                 }
             }
         }
 
-        return $disabledIds;
+        return $disabledVolumeIds;
     }
 
 }
