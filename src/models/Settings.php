@@ -15,6 +15,7 @@ class Settings extends Model
     public ?bool $isPublic = false;
 
     public ?int $itemPerPage = 10;
+    public array $disabledVolumeUids = [];
 
     public function getApiKey(bool $parse = true): string
     {

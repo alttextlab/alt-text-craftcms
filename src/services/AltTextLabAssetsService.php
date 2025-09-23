@@ -161,11 +161,16 @@ class AltTextLabAssetsService
                 return;
             }
 
-            if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
+            $settings = AltTextLab::getInstance()->getSettings();
+            $disabledVolumeUids = $settings->disabledVolumeUids ?? [];
+            $assetVolumeUid = $asset->getVolume()->uid ?? null;
+            if ($assetVolumeUid && in_array($assetVolumeUid, $disabledVolumeUids, true)) {
                 return;
             }
 
-            $settings = AltTextLab::getInstance()->getSettings();
+            if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
+                return;
+            }
 
             $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings);
             if (!$callDetails) {
@@ -215,11 +220,18 @@ class AltTextLabAssetsService
 
             $body = ['imageUrl' => $imageUrl];
         } else {
-            $fsPath = Craft::getAlias($asset->getVolume()->fs->path);
-            $filePath = $fsPath . DIRECTORY_SEPARATOR . $asset->getPath();
+            $fsPath = Craft::getAlias($asset->getVolume()->fs->path ?? '');
+            $subpath = Craft::parseEnv($asset->getVolume()->subpath ?? '');
+
+            $fsPath = rtrim($fsPath, DIRECTORY_SEPARATOR);
+            $subpath = trim($subpath, DIRECTORY_SEPARATOR);
+
+            $rootPath = $subpath ? ($fsPath . DIRECTORY_SEPARATOR . $subpath) : $fsPath;
+
+            $filePath = rtrim($rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($asset->getPath(), DIRECTORY_SEPARATOR);
 
             if (!file_exists($filePath)) {
-                $this->logService->log($asset->id, $bulkGenerationId,"File doesn't exist: " . $filePath);
+                $this->logService->log($asset->id, $bulkGenerationId, "File doesn't exist: " . $filePath);
                 return null;
             }
 
