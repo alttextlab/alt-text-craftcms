@@ -1,3 +1,6 @@
+1.2.0 - 2025-09-15
+Implemented the ability to ignore specific asset volumes during alt text generation.
+
 1.1.0 - 2025-09-15
 fix SQL error when clearing garbage
 
