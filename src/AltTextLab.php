@@ -78,7 +78,7 @@ class AltTextLab extends Plugin
         if ($settings->onUploadGenerate && $settings->apiKey && $account && $account['credits'] > 0) {
             Event::on(
                 Asset::class,
-                Asset::EVENT_AFTER_SAVE,
+                Asset::EVENT_AFTER_PROPAGATE,
                 function (ModelEvent $event) {
                     if ($event->sender->enabled && $event->sender->getEnabledForSite() && $event->sender->firstSave && $event->sender->alt == "") {
                         $asset = $event->sender;
@@ -95,6 +95,17 @@ class AltTextLab extends Plugin
             Asset::class,
             Element::EVENT_REGISTER_ACTIONS,
             function (RegisterElementActionsEvent $event) {
+                $settings = $this->getSettings();
+                $disabledVolumeUids = $settings->disabledVolumeUids ?? [];
+                $source = $event->source;
+
+                if (is_string($source) && str_starts_with($source, 'volume:')) {
+                    $uid = substr($source, strlen('volume:'));
+                    if (in_array($uid, $disabledVolumeUids, true)) {
+                        return;
+                    }
+                }
+
                 $event->actions[] = BulkGeneration::class;
             }
         );
