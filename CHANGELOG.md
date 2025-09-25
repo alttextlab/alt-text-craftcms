@@ -1,4 +1,7 @@
-1.2.0 - 2025-09-15
+1.2.1 - 2025-09-25
+Minor link fixes
+
+1.2.0 - 2025-09-23
 Implemented the ability to ignore specific asset volumes during alt text generation.
 
 1.1.0 - 2025-09-15
