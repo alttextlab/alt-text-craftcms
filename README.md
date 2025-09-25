@@ -1,6 +1,6 @@
 # AI Alt Text Generator for CraftCMS
 
-The **[AI Alt Text Generator](https://alttextlab.com?utm_source=craftcms-directory&utm_medium=craftcms-overview-block) for CraftCMS** is a plugin that automatically creates high-quality, descriptive alt text for images in your CraftCMS media library. Powered by the [AltTextLab](https://alttextlab.com) API, it uses advanced AI to generate accessible and SEO-friendly image descriptions, saving you time and improving your website’s accessibility compliance.
+The **[AI Alt Text Generator](https://alttextlab.com?utm_medium=integration&utm_source=craftcms&utm_campaign=github) for CraftCMS** is a plugin that automatically creates high-quality, descriptive alt text for images in your CraftCMS media library. Powered by the [AltTextLab](https://alttextlab.com) API, it uses advanced AI to generate accessible and SEO-friendly image descriptions, saving you time and improving your website’s accessibility compliance.
 
 **[GitHub Repository](https://github.com/alttextlab/alt-text-craftcms)** - **[Plugin Store](https://plugins.craftcms.com/alt-text-lab)**
 
@@ -16,7 +16,7 @@ The **[AI Alt Text Generator](https://alttextlab.com?utm_source=craftcms-directo
 This plugin requires:
 - Craft CMS 5.0.0 or later
 - PHP 8.2 or later
-- AltTextLab API key (You can create one [here](https://app.alttextlab.com/settings/api-keys?utm_source=craftcms-directory&utm_medium=craftcms-requirements-block))
+- AltTextLab API key (You can create one [here](https://app.alttextlab.com/settings/api-keys?utm_medium=integration&utm_source=craftcms&utm_campaign=github))
 
 ## Installation
 
@@ -25,8 +25,8 @@ You can install this plugin from the [Plugin Store](https://plugins.craftcms.com
 ## Setup Alt Text Generator
 
 1. Make sure the plugin is installed in your CraftCMS.
-2. If you don’t have an AltTextLab account yet, create one [here](https://www.alttextlab.com/?utm_source=craftcms-directory&utm_medium=craftcms-setup-block).
-3. Go to the [API Keys page](https://app.alttextlab.com/settings/api-keys?utm_source=craftcms-directory&utm_medium=craftcms-setup-block) and create a new API key by clicking **Create API Key**. Copy the generated key.
+2. If you don’t have an AltTextLab account yet, create one [here](https://www.alttextlab.com/?utm_medium=integration&utm_source=craftcms&utm_campaign=github).
+3. Go to the [API Keys page](https://app.alttextlab.com/settings/api-keys?utm_medium=integration&utm_source=craftcms&utm_campaign=github) and create a new API key by clicking **Create API Key**. Copy the generated key.
 4. In CraftCMS, open the plugin settings (**AltTextLab → Settings**) and paste the API key into the **AltTextLab API Key** field. Save the changes.
 5. The plugin is ready to use! 
 
@@ -70,6 +70,6 @@ The Alt Text Generator for CraftCMS supports the following image formats:
 
 If you encounter any issues, have feature requests, or need help getting started, feel free to reach out:
 
-- **Website:** [https://www.alttextlab.com](https://www.alttextlab.com?utm_source=craftcms-directory&utm_medium=craftcms-support-block)
+- **Website:** [https://www.alttextlab.com](https://www.alttextlab.com?utm_medium=integration&utm_source=craftcms&utm_campaign=github)
 - **Support Email:** contact@alttextlab.com
-- [Contact us](https://www.alttextlab.com/contact?utm_source=craftcms-directory&utm_medium=craftcms-support-block)
+- [Contact us](https://www.alttextlab.com/contact?utm_medium=integration&utm_source=craftcms&utm_campaign=github)
