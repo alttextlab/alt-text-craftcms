@@ -9,6 +9,13 @@ use craft\elements\Asset as AssetElement;
 class CraftAssetsService
 {
 
+    private $utilityService;
+
+    public function __construct()
+    {
+        $this->utilityService = new UtilityService();
+    }
+
     public function getCountAssets(array $assetIds = []): int
     {
         $settings = AltTextLab::getInstance()->getSettings();
@@ -28,9 +35,18 @@ class CraftAssetsService
         }
 
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
-            $count = $query->count();
+            foreach ($query->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+                $count++;
+            }
         } else {
             foreach ($query->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+
                 $fieldLayout = $asset->getFieldLayout();
 
                 if (!$fieldLayout || !$fieldLayout->getFieldByHandle($altFieldHandle)) {
@@ -65,9 +81,19 @@ class CraftAssetsService
 
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
             $assetsQuery->hasAlt($hasAltText);
-            $count = $assetsQuery->count();
+
+            foreach ($assetsQuery->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+                $count++;
+            }
         } else {
             foreach ($assetsQuery->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+
                 $fieldLayout = $asset->getFieldLayout();
 
                 if (!$fieldLayout || !$fieldLayout->getFieldByHandle($altFieldHandle)) {
@@ -110,9 +136,18 @@ class CraftAssetsService
             if (!$hasAltText){
                 $query->hasAlt($hasAltText);
             }
-            $resultAssets = $query->all();
+            foreach ($query->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+                $resultAssets[] = $asset;
+            }
         } else {
             foreach ($query->each() as $asset) {
+                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                    continue;
+                }
+
                 $fieldLayout = $asset->getFieldLayout();
 
                 if (!$fieldLayout || !$fieldLayout->getFieldByHandle($altFieldHandle)) {
