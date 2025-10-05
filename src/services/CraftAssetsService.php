@@ -34,16 +34,22 @@ class CraftAssetsService
             $query->id($assetIds);
         }
 
+        $regexExcludePathPattern = $this->utilityService->getExcludeRegexEnv();
+
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
-            foreach ($query->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
-                    continue;
+            if ($regexExcludePathPattern) {
+                foreach ($query->each() as $asset) {
+                    if ($this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
+                        continue;
+                    }
+                    $count++;
                 }
-                $count++;
+            } else {
+                $count = $query->count();
             }
         } else {
             foreach ($query->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                if ($regexExcludePathPattern && $this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
                     continue;
                 }
 
@@ -79,18 +85,23 @@ class CraftAssetsService
             $assetsQuery->id($assetIds);
         }
 
+        $regexExcludePathPattern = $this->utilityService->getExcludeRegexEnv();
+
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
             $assetsQuery->hasAlt($hasAltText);
-
-            foreach ($assetsQuery->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
-                    continue;
+            if ($regexExcludePathPattern) {
+                foreach ($assetsQuery->each() as $asset) {
+                    if ($this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
+                        continue;
+                    }
+                    $count++;
                 }
-                $count++;
+            } else {
+                $count = $assetsQuery->count();
             }
         } else {
             foreach ($assetsQuery->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                if ($regexExcludePathPattern && $this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
                     continue;
                 }
 
@@ -132,19 +143,26 @@ class CraftAssetsService
             $query->id($assetIds);
         }
 
+        $regexExcludePathPattern = $this->utilityService->getExcludeRegexEnv();
+
         if (empty($altFieldHandle) || $altFieldHandle === 'alt') {
             if (!$hasAltText){
                 $query->hasAlt($hasAltText);
             }
-            foreach ($query->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
-                    continue;
+
+            if ($regexExcludePathPattern) {
+                foreach ($query->each() as $asset) {
+                    if ($this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
+                        continue;
+                    }
+                    $resultAssets[] = $asset;
                 }
-                $resultAssets[] = $asset;
+            } else {
+                $resultAssets = $query->all();
             }
         } else {
             foreach ($query->each() as $asset) {
-                if ($this->utilityService->isPathExcludedByRegex($asset)) {
+                if ($regexExcludePathPattern && $this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)) {
                     continue;
                 }
 

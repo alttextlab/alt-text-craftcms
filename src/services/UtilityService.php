@@ -47,13 +47,11 @@ class UtilityService
         return true;
     }
 
-    public function isPathExcludedByRegex($asset): bool
+    public function isPathExcludedByRegex($asset, $pattern): bool
     {
         if (!$asset) {
             return false;
         }
-
-        $pattern = App::parseEnv(self::ENV_EXCLUDE_REGEX);
 
         if (!$pattern || trim($pattern) === '') {
             return false;
@@ -88,6 +86,11 @@ class UtilityService
 
         $filePath = rtrim($rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($asset->getPath(), DIRECTORY_SEPARATOR);
         return $filePath;
+    }
+
+    public function getExcludeRegexEnv()
+    {
+        return App::parseEnv(self::ENV_EXCLUDE_REGEX);
     }
 
     public function logMessage(string $message, $bulkGenerationId, $assetId): void

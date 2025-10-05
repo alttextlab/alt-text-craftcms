@@ -168,7 +168,8 @@ class AltTextLabAssetsService
                 return;
             }
 
-            if ($this->utilityService->isPathExcludedByRegex($asset)){
+            $regexExcludePathPattern = $this->utilityService->getExcludeRegexEnv();
+            if ($regexExcludePathPattern && $this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)){
                 return;
             }
 
