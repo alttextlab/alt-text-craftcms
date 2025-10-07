@@ -2,11 +2,13 @@
 namespace alttextlab\AltTextLab\services;
 
 use Craft;
+use craft\helpers\App;
 
 class UtilityService
 {
 
     private $logService;
+    private const ENV_EXCLUDE_REGEX = '$ALT_TEXT_LAB_EXCLUDE_REGEX';
 
     public function __construct()
     {
@@ -43,6 +45,52 @@ class UtilityService
         }
 
         return true;
+    }
+
+    public function isPathExcludedByRegex($asset, $pattern): bool
+    {
+        if (!$asset) {
+            return false;
+        }
+
+        if (!$pattern || trim($pattern) === '') {
+            return false;
+        }
+
+        $path = $this->getFilePath($asset);
+
+        if (!$path) {
+            return false;
+        }
+
+        $pattern = trim($pattern);
+
+        $result = @preg_match($pattern, $path);
+
+        if ($result === false) {
+            $result = @preg_match('~' . $pattern . '~', $path);
+        }
+
+        return $result === 1;
+    }
+
+    public function getFilePath($asset)
+    {
+        $fsPath = Craft::getAlias($asset->getVolume()->fs->path ?? '');
+        $subpath = Craft::parseEnv($asset->getVolume()->subpath ?? '');
+
+        $fsPath = rtrim($fsPath, DIRECTORY_SEPARATOR);
+        $subpath = trim($subpath, DIRECTORY_SEPARATOR);
+
+        $rootPath = $subpath ? ($fsPath . DIRECTORY_SEPARATOR . $subpath) : $fsPath;
+
+        $filePath = rtrim($rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($asset->getPath(), DIRECTORY_SEPARATOR);
+        return $filePath;
+    }
+
+    public function getExcludeRegexEnv()
+    {
+        return App::parseEnv(self::ENV_EXCLUDE_REGEX);
     }
 
     public function logMessage(string $message, $bulkGenerationId, $assetId): void

@@ -1,3 +1,6 @@
+1.3.0 - 2025-10-07
+Add regex-based exclusion via ALT_TEXT_LAB_EXCLUDE_REGEX to skip assets by path
+
 1.2.1 - 2025-09-25
 Minor link fixes
 
