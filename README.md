@@ -60,6 +60,39 @@ The Alt Text Generator for CraftCMS supports the following image formats:
 - **AVIF**
 - **SVG**
 
+## Exclude Specific Images
+
+You can prevent certain assets from being processed in two ways:
+
+- Disable entire Asset Volumes in plugin settings (recommended)
+- Use a regex rule in your `.env` to exclude files by path
+
+### Method 1: Disable Asset Volumes (Recommended)
+
+1. In Craft, go to `AltTextLab → Settings`.
+2. Find the "Disable volumes" option.
+3. Select one or more volumes to exclude. Assets stored in these volumes will be skipped during both automatic and bulk alt text generation.
+
+This method is simple, safe, and easy to maintain.
+
+### Method 2: Advanced exclusion via regex (Environment variable)
+
+For finer control, you can exclude files by matching their full file system path with a regular expression. Define the following environment variable in your `.env` file:
+
+```bash
+# Examples (pick one and adjust to your needs)
+ALT_TEXT_LAB_EXCLUDE_REGEX=~/(thumbnails|icons)/~i
+# Or exclude anything in /uploads/tmp/
+# ALT_TEXT_LAB_EXCLUDE_REGEX=~/uploads/tmp/~
+# Or exclude all SVGs inside "branding" folder
+# ALT_TEXT_LAB_EXCLUDE_REGEX=~branding/.+\.svg$~i
+```
+
+Notes:
+- The pattern is applied against the asset's full local path, which includes the volume file system path, optional `subpath`, and the asset path.
+- You may provide a PCRE pattern with delimiters (e.g., `~/pattern/~i`). If you omit delimiters, the plugin will attempt to wrap your pattern automatically.
+- Regex-based exclusions apply to both automatic generation and bulk operations.
+
 ## Troubleshooting
 
 - The plugin includes a **AltTextLab → Logs** page where you can view any errors related to alt text generation.
