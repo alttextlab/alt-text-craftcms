@@ -168,6 +168,11 @@ class AltTextLabAssetsService
                 return;
             }
 
+            $regexExcludePathPattern = $this->utilityService->getExcludeRegexEnv();
+            if ($regexExcludePathPattern && $this->utilityService->isPathExcludedByRegex($asset, $regexExcludePathPattern)){
+                return;
+            }
+
             if (!$this->utilityService->checkAssetIsValid($asset, $bulkGenerationId)) {
                 return;
             }
@@ -220,15 +225,7 @@ class AltTextLabAssetsService
 
             $body = ['imageUrl' => $imageUrl];
         } else {
-            $fsPath = Craft::getAlias($asset->getVolume()->fs->path ?? '');
-            $subpath = Craft::parseEnv($asset->getVolume()->subpath ?? '');
-
-            $fsPath = rtrim($fsPath, DIRECTORY_SEPARATOR);
-            $subpath = trim($subpath, DIRECTORY_SEPARATOR);
-
-            $rootPath = $subpath ? ($fsPath . DIRECTORY_SEPARATOR . $subpath) : $fsPath;
-
-            $filePath = rtrim($rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($asset->getPath(), DIRECTORY_SEPARATOR);
+            $filePath = $this->utilityService->getFilePath($asset);
 
             if (!file_exists($filePath)) {
                 $this->logService->log($asset->id, $bulkGenerationId, "File doesn't exist: " . $filePath);
