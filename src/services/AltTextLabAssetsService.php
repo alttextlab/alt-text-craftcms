@@ -10,6 +10,7 @@ use alttextlab\AltTextLab\models\AltTextLabAsset;
 use alttextlab\AltTextLab\models\AltTextLabAsset as AltTextLabAssetModel;
 use alttextlab\AltTextLab\records\AltTextLabAsset as AltTextLabAssetRecord;
 use alttextlab\AltTextLab\AltTextLab;
+use craft\db\Query;
 
 class AltTextLabAssetsService
 {
@@ -156,7 +157,7 @@ class AltTextLabAssetsService
     public function generateAltText($assetId, $bulkGenerationId): void
     {
         try {
-            $asset = Asset::find()->id($assetId)->one();
+            $asset = Asset::find()->id($assetId)->status(null)->one();
             if (!$asset) {
                 return;
             }
@@ -177,35 +178,87 @@ class AltTextLabAssetsService
                 return;
             }
 
-            $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings);
-            if (!$callDetails) {
+            if (empty($settings->autoUseSiteLanguage)) {
+                $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings, null);
+                if (!$callDetails) {
+                    return;
+                }
+
+                $apiResult = $this->requestAltTextFromApi($callDetails, (int)$asset->id, $bulkGenerationId, (int)$asset->siteId);
+                if (!$apiResult) {
+                    return;
+                }
+
+                $this->setAltTextOnAsset($asset, $apiResult['altText'], $settings);
+
+                $success = Craft::$app->elements->saveElement($asset, true, false);
+
+                if ($success) {
+                    $this->saveAsset($this->buildModel($assetId, $bulkGenerationId, $apiResult['responseId'], $apiResult['altText']));
+                }
+
                 return;
             }
 
-            $responseArray = $this->apiService->generateAltText($callDetails);
+            $supportedLanguages = require AltTextLab::getInstance()->getBasePath() . '/configs/Languages.php';
+            $supportedLookup = $this->utilityService->buildSupportedLanguageLookup(array_keys($supportedLanguages));
 
-            if ($responseArray == 'API_KEY_IS_INVALID'){
-                $this->logService->log($asset->id, $bulkGenerationId, 'Api Key is invalid!');
+            $sites = Craft::$app->getSites()->getAllSites();
+            $sitesByApiLang = [];
+
+            foreach ($sites as $site) {
+                $assetForSite = Asset::find()
+                    ->id($assetId)
+                    ->siteId($site->id)
+                    ->status(null)
+                    ->one();
+
+                if (!$assetForSite) {
+                    continue;
+                }
+
+                if (!$assetForSite->enabled || !$assetForSite->getEnabledForSite()) {
+                    continue;
+                }
+
+                $apiLang = $this->utilityService->normalizeCraftLanguageToApi((string)$site->language, $supportedLookup);
+                $sitesByApiLang[$apiLang][] = (int)$site->id;
+            }
+
+            if (empty($sitesByApiLang)) {
                 return;
             }
 
-            if ($responseArray == 'NOT_ENOUGH_FUNDS'){
-                $this->logService->log($asset->id, $bulkGenerationId, 'You dont have enough funds to generate alt text!');
-                return;
-            }
+            foreach ($sitesByApiLang as $apiLang => $siteIds) {
+                $callDetails = $this->findCallDetailsForSiteGroup($assetId, $bulkGenerationId, $settings, $apiLang, $siteIds);
 
-            $responseArray = json_decode($responseArray, true);
+                if (!$callDetails) {
+                    continue;
+                }
 
-            if (!isset($responseArray['result'])) {
-                $this->logService->log($asset->id, $bulkGenerationId, $this->LOG_FAILED_MESSAGE);
-                return;
-            }
+                $apiResult = $this->requestAltTextFromApi($callDetails, (int)$asset->id, $bulkGenerationId, $siteIds[0] ?? null);
+                if (!$apiResult) {
+                    continue;
+                }
 
-            $this->setAltTextOnAsset($asset, $responseArray['result'], $settings);
-            $success = Craft::$app->elements->saveElement($asset);
+                foreach ($siteIds as $siteId) {
+                    $assetForSave = Asset::find()
+                        ->id($assetId)
+                        ->siteId($siteId)
+                        ->status(null)
+                        ->one();
 
-            if ($success) {
-                $this->saveAsset($this->buildModel($assetId, $bulkGenerationId, $responseArray['id'], $responseArray['result']));
+                    if (!$assetForSave) {
+                        continue;
+                    }
+
+                    $this->setAltTextOnAsset($assetForSave, $apiResult['altText'], $settings);
+
+                    $saved = Craft::$app->elements->saveElement($assetForSave, true, false);
+                    if ($saved) {
+                        $this->saveAsset($this->buildModel($assetId, $bulkGenerationId, $apiResult['responseId'], $apiResult['altText']));
+                    }
+                }
             }
         } catch (\Throwable $e) {
             Craft::error('Alt text generation error: ' . $e->getMessage(), __METHOD__);
@@ -213,7 +266,59 @@ class AltTextLabAssetsService
         }
     }
 
-    private function prepareApiRequestData($asset, $bulkGenerationId, $settings): ?array
+    /**
+     * Calls API and returns normalized payload for saving.
+     */
+    private function requestAltTextFromApi(array $callDetails, int $assetId, $bulkGenerationId): ?array
+    {
+        $response = $this->apiService->generateAltText($callDetails);
+
+        if ($response === 'API_KEY_IS_INVALID') {
+            $this->logService->log($assetId, $bulkGenerationId, 'Api Key is invalid!');
+            return null;
+        }
+
+        if ($response === 'NOT_ENOUGH_FUNDS') {
+            $this->logService->log($assetId, $bulkGenerationId, 'You dont have enough funds to generate alt text!');
+            return null;
+        }
+
+        $json = json_decode($response, true);
+
+        if (!is_array($json) || !isset($json['result'])) {
+            $this->logService->log($assetId, $bulkGenerationId, $this->LOG_FAILED_MESSAGE);
+            return null;
+        }
+
+        return [
+            'altText' => (string)$json['result'],
+            'responseId' => (int)($json['id'] ?? 0),
+        ];
+    }
+
+    private function findCallDetailsForSiteGroup($assetId, $bulkGenerationId, $settings, string $apiLang, array $siteIds): ?array
+    {
+        foreach ($siteIds as $candidateSiteId) {
+            $assetCandidate = Asset::find()
+                ->id($assetId)
+                ->siteId($candidateSiteId)
+                ->status(null)
+                ->one();
+
+            if (!$assetCandidate) {
+                continue;
+            }
+
+            $callDetails = $this->prepareApiRequestData($assetCandidate, $bulkGenerationId, $settings, $apiLang);
+            if ($callDetails) {
+                return $callDetails;
+            }
+        }
+
+        return null;
+    }
+
+    private function prepareApiRequestData($asset, $bulkGenerationId, $settings, ?string $langOverride): ?array
     {
         if ($settings->isPublic) {
             $imageUrl = UrlHelper::siteUrl($asset->url);
@@ -237,10 +342,12 @@ class AltTextLabAssetsService
             $body = ['imageRaw' => $base64];
         }
 
+        $lang = $langOverride ?: ($settings->lang ?: 'en');
+
         return array_merge($body, [
             'source' => 'craftcms',
             'style'  => $settings->modelName,
-            'lang'   => $settings->lang
+            'lang'   => $lang,
         ]);
     }
 

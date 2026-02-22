@@ -103,13 +103,19 @@ class AltTextLab extends Plugin
         });
 
         if ($settings->onUploadGenerate && $settings->apiKey && $account && $account['credits'] > 0) {
+            $primarySiteId = Craft::$app->getSites()->getPrimarySite()->id ?? null;
+
             Event::on(
                 Asset::class,
                 Asset::EVENT_AFTER_PROPAGATE,
-                function (ModelEvent $event) {
-                    if ($event->sender->enabled && $event->sender->getEnabledForSite() && $event->sender->firstSave && $event->sender->alt == "") {
-                        $asset = $event->sender;
+                function (ModelEvent $event) use ($primarySiteId) {
+                    $asset = $event->sender;
 
+                    if ($primarySiteId && (int)$asset->siteId !== (int)$primarySiteId) {
+                        return;
+                    }
+
+                    if ($asset->enabled && $asset->getEnabledForSite() && $asset->firstSave && $asset->alt == "") {
                         Queue::push(new GenerateAltTextJob([
                             'assetId' => $asset->id
                         ]));
