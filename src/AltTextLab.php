@@ -16,6 +16,7 @@ use alttextlab\AltTextLab\actions\BulkGeneration;
 use alttextlab\AltTextLab\jobs\GenerateAltTextJob;
 use alttextlab\AltTextLab\models\Settings;
 use alttextlab\AltTextLab\services\ApiService;
+use alttextlab\AltTextLab\services\UtilityService;
 use yii\base\Event;
 
 class AltTextLab extends Plugin
@@ -33,6 +34,12 @@ class AltTextLab extends Plugin
         Craft::$app->onInit(function () {
             $this->attachEventHandlers();
         });
+    }
+
+    public function afterInstall(): void
+    {
+        parent::afterInstall();
+        $this->ensureLangSettingInitialized();
     }
 
     protected function createSettingsModel(): ?Model
@@ -55,6 +62,26 @@ class AltTextLab extends Plugin
             'languages' => $languages,
             'account' => $account,
         ]);
+    }
+
+    private function ensureLangSettingInitialized(): void
+    {
+        $settings = $this->getSettings();
+        if (!empty($settings->lang)) {
+            return;
+        }
+
+        $languages = require $this->getBasePath() . '/configs/Languages.php';
+        $utilityService = new UtilityService();
+        $supportedLookup = $utilityService->buildSupportedLanguageLookup(array_keys($languages));
+
+        $primarySiteLanguage = Craft::$app->getSites()->getPrimarySite()->language ?? 'en';
+        $defaultLang = $utilityService->normalizeCraftLanguageToApi((string)$primarySiteLanguage, $supportedLookup);
+
+        $data = $settings->toArray();
+        $data['lang'] = $defaultLang;
+
+        Craft::$app->getPlugins()->savePluginSettings($this, $data);
     }
 
     private function attachEventHandlers(): void

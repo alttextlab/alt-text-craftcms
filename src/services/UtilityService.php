@@ -100,4 +100,29 @@ class UtilityService
         $this->logService->log($assetId, $bulkGenerationId, $fullMessage);
     }
 
+    public function buildSupportedLanguageLookup(array $supportedCodes): array
+    {
+        $lookup = [];
+        foreach ($supportedCodes as $code) {
+            $lookup[strtolower($code)] = $code;
+        }
+        return $lookup;
+    }
+
+    public function normalizeCraftLanguageToApi(string $craftLanguage, array $supportedLookup): string
+    {
+        $language = strtolower(trim($craftLanguage));
+        $language = str_replace('_', '-', $language);
+
+        if (isset($supportedLookup[$language])) {
+            return $supportedLookup[$language];
+        }
+
+        $primary = explode('-', $language, 2)[0] ?? '';
+        if ($primary && isset($supportedLookup[$primary])) {
+            return $supportedLookup[$primary];
+        }
+
+        return 'en';
+    }
 }
