@@ -9,11 +9,12 @@ class RefreshAltTextJob extends BaseJob
 {
 
     public int $assetId;
+    public ?int $siteId = null;
 
     public function execute($queue): void
     {
-       $service = new AltTextLabAssetsService();
-       $service->changeCraftAssetAltByAssetId($this->assetId);
+        $service = new AltTextLabAssetsService();
+        $service->changeCraftAssetAltByAssetId($this->assetId, $this->siteId);
     }
 
     protected function defaultDescription(): string

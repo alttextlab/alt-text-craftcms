@@ -4,17 +4,19 @@ namespace alttextlab\AltTextLab\services;
 
 use alttextlab\AltTextLab\models\AltTextLabLog as AltTextLabLogModel;
 use alttextlab\AltTextLab\records\AltTextLabLog as AltTextLabLogRecord;
+use Craft;
 use craft\elements\Asset;
+use craft\db\Query;
 
 class LogService
 {
-    public function log($assetId, $bulkGenerationId, $text): AltTextLabLogModel
+    public function log($assetId, $bulkGenerationId, $text, ?int $siteId = null): AltTextLabLogModel
     {
-
         $model = new AltTextLabLogModel();
         $model->assetId = $assetId;
         $model->logMessage = $text;
         $model->bulkGenerationId = $bulkGenerationId;
+        $model->siteId = $siteId;
 
         $record = new AltTextLabLogRecord();
 
@@ -22,6 +24,7 @@ class LogService
             'assetId',
             'logMessage',
             'bulkGenerationId',
+            'siteId',
         ];
 
         foreach ($fieldsToUpdate as $handle) {
@@ -37,7 +40,7 @@ class LogService
 
         $model->id = $record->id;
 
-        return  $model;
+        return $model;
     }
 
     public function getAllLogs($filters = [], &$thereIsWithoutURL): array
@@ -84,6 +87,20 @@ class LogService
         }
 
         return $recordsQuery->count();
+    }
+
+    public function getDistinctAssetCount(array $conditions = []): int
+    {
+        $query = (new Query())
+            ->from(AltTextLabLogRecord::tableName())
+            ->select(['assetId'])
+            ->distinct(true);
+
+        if (!empty($conditions)) {
+            $query->where($conditions);
+        }
+
+        return (int)$query->count('assetId', Craft::$app->db);
     }
 
 }

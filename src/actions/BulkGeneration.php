@@ -23,7 +23,11 @@ class BulkGeneration extends ElementAction
                 activate: function(selectedItems) {
                     const elements = selectedItems.toArray ? selectedItems.toArray() : Array.from(selectedItems);
                     const ids = elements.map(el => el.dataset.id);
-                    const uid = crypto.randomUUID();
+                    const uid =
+                        (globalThis.crypto?.randomUUID?.() ??
+                        (typeof Craft?.randomString === 'function'
+                            ? Craft.randomString(32)
+                            : (Date.now() + '-' + Math.random().toString(16).slice(2))));
                 
                     fetch(Craft.getCpUrl('alt-text-lab/utility'), {
                     method: 'POST',
