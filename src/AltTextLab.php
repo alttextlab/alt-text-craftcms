@@ -23,7 +23,7 @@ class AltTextLab extends Plugin
     public static AltTextLab $plugin;
     public bool $hasCpSection = true;
     public bool $hasCpSettings = true;
-    public string $schemaVersion = '1.0.1';
+    public string $schemaVersion = '1.0.2';
 
     public function init(): void
     {
