@@ -11,6 +11,7 @@ use alttextlab\AltTextLab\models\AltTextLabAsset as AltTextLabAssetModel;
 use alttextlab\AltTextLab\records\AltTextLabAsset as AltTextLabAssetRecord;
 use alttextlab\AltTextLab\AltTextLab;
 use craft\db\Query;
+use craft\base\Field;
 
 class AltTextLabAssetsService
 {
@@ -208,7 +209,25 @@ class AltTextLabAssetsService
                 return;
             }
 
-            if (empty($settings->autoUseSiteLanguage)) {
+            $customField = (string)($settings->customField ?? 'alt');
+            $supportsPerSite = false;
+            $method = null;
+
+            if ($customField === '' || $customField === 'alt') {
+                $volume = $asset->getVolume();
+                $method = $volume->altTranslationMethod ?? Field::TRANSLATION_METHOD_SITE;
+            } else {
+                $field = Craft::$app->getFields()->getFieldByHandle($customField);
+                $method = $field?->translationMethod;
+            }
+
+            $supportsPerSite = in_array(
+                $method,
+                [Field::TRANSLATION_METHOD_SITE, Field::TRANSLATION_METHOD_LANGUAGE],
+                true
+            );
+
+            if (empty($settings->autoUseSiteLanguage) || !$supportsPerSite) {
                 $callDetails = $this->prepareApiRequestData($asset, $bulkGenerationId, $settings, null);
                 if (!$callDetails) {
                     return;

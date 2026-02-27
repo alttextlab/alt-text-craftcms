@@ -111,11 +111,8 @@
      class="warning"
      style="margin-top:8px;">
     <p style="margin:0;">
-        <strong>Warning:</strong>
-        When “Automatically use each site’s language (multi-site)” is enabled, the plugin can only store different alt
-        texts per site/language if the selected field is translatable per-site/per-language.
-        Auto-detection is always reliable with the default <code>alt</code> field.
-        Check the field’s “Translation Method” in <a href="{{ cpUrl('settings/fields') }}"><strong>Settings → Fields</strong></a>.
+        When “Automatically use each site’s language (multi-site)” is enabled, the plugin can only store different alt texts per site/language if the selected field is translatable per-site/per-language.
+        For the default <code>alt</code> field, set it in <a href="{{ cpUrl('settings/assets') }}"><strong>Settings → Assets</strong></a> → your volume → Field layout; for custom fields, set “Translation Method” in <a href="{{ cpUrl('settings/fields') }}"><strong>Settings → Fields</strong></a>.
     </p>
 </div>
 
@@ -201,15 +198,7 @@
         lockTarget.classList.toggle('alttextlab-select-locked', locked);
       }
 
-      const selected = customFieldSelect.value;
-      if (!isAutoOn() || !selected || selected === 'alt') {
-        warning.hidden = true;
-        return;
-      }
-
-      const method = customFieldSelect.selectedOptions?.[0]?.dataset?.translationMethod ?? null;
-      const ok = method === 'site' || method === 'language';
-      warning.hidden = ok;
+      warning.hidden = !isAutoOn();
     };
 
     if (!lightswitch.dataset.alttextlabBound) {
