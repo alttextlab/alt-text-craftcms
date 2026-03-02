@@ -61,6 +61,7 @@
     {% endif %}
 </div>
 
+{# Start Auto-generate alt text #}
 {{ forms.lightswitchField({
     label: "Auto-generate alt text for new assets",
     instructions: "",
@@ -68,7 +69,41 @@
     name: 'onUploadGenerate',
     on: settings.onUploadGenerate
 }) }}
+{# End Auto-generate alt text #}
 
+{# Start multi-site checkbox #}
+{{ forms.lightswitchField({
+    label: "Automatically use each site’s language (multi-site)",
+    instructions: "When enabled, the plugin detects the language configured for each site and generates alt text in that language. You can manage sites and languages in <a href=\"" ~ cpUrl('settings/sites') ~ "\"><strong>Settings → Sites</strong></a>."|raw,
+    id: 'autoUseSiteLanguage',
+    name: 'autoUseSiteLanguage',
+    on: settings.autoUseSiteLanguage
+}) }}
+{# End multi-site checkbox #}
+
+{# Start language #}
+{{ forms.selectField({
+    label: "Language",
+    options: languages,
+    id: 'lang',
+    name: 'lang',
+    value: settings.lang ?? 'en',
+    errors: settings.getErrors('lang')
+}) }}
+{# End language #}
+
+{# Start Model type #}
+{{ forms.selectField({
+    label: "Model type",
+    options: modelOptions,
+    id: 'modelName',
+    name: 'modelName',
+    value: settings.modelName ?? 'describe-regular',
+    errors: settings.getErrors('modelName')
+}) }}
+{# End Model type #}
+
+{# Start Field for Alt Text #}
 {% set volumes = craft.app.getVolumes().getAllVolumes() %}
 {% set customFields = [] %}
 {% set customField = {
@@ -96,7 +131,6 @@
     {% endfor %}
 {% endfor %}
 
-
 {{ forms.selectField({
     label: "Field for Alt Text",
     instructions: "You'll need to resync your assets after changing this setting.",
@@ -106,7 +140,9 @@
     value: settings.customField ?? 'alt',
     errors: settings.getErrors('customField')
 }) }}
+{# End Field for Alt Text #}
 
+{# Start Field for Alt Text multi-site warning #}
 <div data-alttextlab-customfield-warning="1"
      class="warning"
      style="margin-top:8px;">
@@ -115,33 +151,9 @@
         For the default <code>alt</code> field, set it in <a href="{{ cpUrl('settings/assets') }}"><strong>Settings → Assets</strong></a> → your volume → Field layout; for custom fields, set “Translation Method” in <a href="{{ cpUrl('settings/fields') }}"><strong>Settings → Fields</strong></a>.
     </p>
 </div>
+{# End Field for Alt Text multi-site warning #}
 
-{{ forms.selectField({
-    label: "Model type",
-    options: modelOptions,
-    id: 'modelName',
-    name: 'modelName',
-    value: settings.modelName ?? 'describe-regular',
-    errors: settings.getErrors('modelName')
-}) }}
-
-{{ forms.lightswitchField({
-    label: "Automatically use each site’s language (multi-site)",
-    instructions: "When enabled, the plugin detects the language configured for each site and generates alt text in that language. You can manage sites and languages in <a href=\"" ~ cpUrl('settings/sites') ~ "\"><strong>Settings → Sites</strong></a>."|raw,
-    id: 'autoUseSiteLanguage',
-    name: 'autoUseSiteLanguage',
-    on: settings.autoUseSiteLanguage
-}) }}
-
-{{ forms.selectField({
-    label: "Language",
-    options: languages,
-    id: 'lang',
-    name: 'lang',
-    value: settings.lang ?? 'en',
-    errors: settings.getErrors('lang')
-}) }}
-
+{# Start public checkbox #}
 {{ forms.lightswitchField({
     label: "This site is reachable over the public internet",
     instructions: "",
@@ -149,7 +161,9 @@
     name: 'isPublic',
     on: settings.isPublic
 }) }}
+{# End public checkbox #}
 
+{# Start disable volumes #}
 {% set volumeOptions = [] %}
 {% for volume in volumes %}
     {% set volumeOptions = volumeOptions|merge([{ label: volume.name, value: volume.uid }]) %}
@@ -163,7 +177,7 @@
     options: volumeOptions,
     values: settings.disabledVolumeUids ?? []
 }) }}
-
+{# End disable volumes #}
 {% js %}
 (() => {
   const init = () => {
