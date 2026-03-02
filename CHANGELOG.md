@@ -1,3 +1,7 @@
+1.4.0 - 2026-03-02
+Added multi-site support — automatically generate alt text in each site's language
+Set default language from the primary site on install
+
 1.3.0 - 2025-10-07
 Add regex-based exclusion via ALT_TEXT_LAB_EXCLUDE_REGEX to skip assets by path
 
