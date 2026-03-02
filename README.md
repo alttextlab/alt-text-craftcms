@@ -9,6 +9,7 @@ The **[AI Alt Text Generator](https://alttextlab.com?utm_medium=integration&utm_
 - **Automatic alt text generation** – Instantly generate alt text for newly uploaded images without any manual work.
 - **Bulk alt text generation for your media library** – Quickly create alt text for all existing images in your CraftCMS media library in one go.
 - **Multi-language support** – Generate alt text in over 130 languages.
+- **Multi-site support** – Automatically generate alt text in each site's language. One API call per unique language, with results shared across sites that use the same language.
 - **Easy setup & Free trial** – Simple installation process with a free trial so you can start improving accessibility right away.  
 
 ## Requirements
@@ -33,8 +34,7 @@ You can install this plugin from the [Plugin Store](https://plugins.craftcms.com
 ## How to use Alt Text Generator
 
 - **Automatic Alt Text Generation**  
-  Enable the **Auto-generate alt text for new assets** switch in the plugin settings. Once enabled, the plugin will automatically generate alt text for all newly uploaded images.  
-  *Generation takes a few seconds, so the alt text may not appear immediately — simply check again after a short delay.*
+  Enable the **Auto-generate alt text for new assets** switch in the plugin settings. Once enabled, the plugin will automatically generate alt text for all newly uploaded images.
 
 - **Bulk Generation for the Entire Media Library**  
   To generate alt text for all images in your CraftCMS media library, go to **AltTextLab → Bulk Generation** and click **Run generation**.  
@@ -43,39 +43,57 @@ You can install this plugin from the [Plugin Store](https://plugins.craftcms.com
 - **Bulk Generation for Selected Media**  
   If you only want to generate alt text for specific images, select them in the **Assets** tab, open the menu, and choose **Bulk generation**.  
 
-## This site is reachable over the public internet
+## Settings
 
-Once your site is publicly accessible and each image can be reached over the internet, we highly recommend enabling the **This site is reachable over the public internet** setting.  
-Enabling this will make the generation process faster and ensure that images are not transferred or processed on our servers.
+All settings are available under **AltTextLab → Settings**.
 
-If you are developing locally or your site is not publicly accessible, keep this setting disabled.  
+### Auto-generate alt text for new assets
 
-## Supported File Types
+When enabled, the plugin automatically generates alt text for every newly uploaded image. Generation takes a few seconds, so the alt text may not appear immediately — simply check again after a short delay.
 
-The Alt Text Generator for CraftCMS supports the following image formats:
+### Automatically use each site's language (multi-site)
 
-- **JPEG / JPG**
-- **PNG**
-- **WebP**
-- **AVIF**
-- **SVG**
+Enable this switch to generate alt text in the language configured for each Craft site (under **Settings → Sites**) instead of using a single language.
 
-## Exclude Specific Images
+When this mode is active:
 
-You can prevent certain assets from being processed in two ways:
+1. The plugin reads the language from each site's locale (e.g. `en-US`, `de`, `fr`).
+2. Sites that share the same language are grouped together — only one API call is made per unique language, keeping usage efficient.
+3. Alt text is saved separately for every site, so each localized version of an asset gets its own description.
 
-- Disable entire Asset Volumes in plugin settings (recommended)
-- Use a regex rule in your `.env` to exclude files by path
+**Important:** The alt text field (native `alt` or your custom field) must have its **Translation Method** set to *Translate for each site* or *Translate for each language*. You can configure this in **Settings → Assets** (for the native `alt` field) or **Settings → Fields** (for custom fields). The plugin will show a warning if the field is not translatable.
 
-### Method 1: Disable Asset Volumes (Recommended)
+### Language
 
-1. In Craft, go to `AltTextLab → Settings`.
-2. Find the "Disable volumes" option.
-3. Select one or more volumes to exclude. Assets stored in these volumes will be skipped during both automatic and bulk alt text generation.
+Choose a language for generated alt text from the **Language** dropdown (130+ languages available). When the multi-site switch above is off, every asset receives alt text in this language regardless of which site it belongs to. When the multi-site switch is on, this dropdown is ignored.
 
-This method is simple, safe, and easy to maintain.
+### Model type
 
-### Method 2: Advanced exclusion via regex (Environment variable)
+Select the style of generated descriptions:
+
+- **Use account default** — uses the style configured in your AltTextLab account.
+- **Descriptive** — rich, detailed descriptions.
+- **Neutral** — balanced tone without subjective language.
+- **Matter-of-fact** — concise, objective descriptions.
+- **Minimal** — shortest possible descriptions.
+
+### Field for Alt Text
+
+Choose which field the plugin writes alt text to. By default, the native **Alt** field is used. You can also select any **Plain Text** custom field attached to your Asset volume's field layout.
+
+If you change this setting after assets have already been processed, use **Bulk Generation** to re-generate alt text into the new field.
+
+### This site is reachable over the public internet
+
+Once your site is publicly accessible and each image can be reached over the internet, we highly recommend enabling this setting. It makes the generation process faster and ensures that images are not transferred or processed on our servers.
+
+If you are developing locally or your site is not publicly accessible, keep this setting disabled.
+
+### Disable volumes (Exclude Specific Images)
+
+Select one or more Asset Volumes to exclude from alt text generation. Assets stored in disabled volumes will be skipped during both automatic and bulk generation.
+
+### Exclude Images by regex
 
 For finer control, you can exclude files by matching their full file system path with a regular expression. Define the following environment variable in your `.env` file:
 
@@ -93,6 +111,16 @@ Notes:
 - You may provide a PCRE pattern with delimiters (e.g., `~/pattern/~i`). If you omit delimiters, the plugin will attempt to wrap your pattern automatically.
 - Regex-based exclusions apply to both automatic generation and bulk operations.
 
+## Supported File Types
+
+The Alt Text Generator for CraftCMS supports the following image formats:
+
+- **JPEG / JPG**
+- **PNG**
+- **WebP**
+- **AVIF**
+- **SVG**
+
 ## Troubleshooting
 
 - The plugin includes a **AltTextLab → Logs** page where you can view any errors related to alt text generation.
@@ -101,7 +129,11 @@ Notes:
 
 ## Support & Feedback
 
-If you encounter any issues, have feature requests, or need help getting started, feel free to reach out:
+If you enjoy the plugin, please [leave a review on the Plugin Store](https://plugins.craftcms.com/alt-text-lab/reviews) — it helps other Craft developers discover it.
+
+Found a bug or have an idea for improvement? [Open an issue on GitHub](https://github.com/alttextlab/alt-text-craftcms/issues).
+
+For general questions or help getting started:
 
 - **Website:** [https://www.alttextlab.com](https://www.alttextlab.com?utm_medium=integration&utm_source=craftcms&utm_campaign=github)
 - **Support Email:** contact@alttextlab.com
