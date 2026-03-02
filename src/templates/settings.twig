@@ -21,6 +21,14 @@
         align-items: center;
         margin: 0;
     }
+
+    .alttextlab-select-locked {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+    .alttextlab-select-locked select {
+        pointer-events: none;
+    }
 </style>
 
 <div id="url-settings" class="nested-fields ">
@@ -53,6 +61,7 @@
     {% endif %}
 </div>
 
+{# Start Auto-generate alt text #}
 {{ forms.lightswitchField({
     label: "Auto-generate alt text for new assets",
     instructions: "",
@@ -60,12 +69,49 @@
     name: 'onUploadGenerate',
     on: settings.onUploadGenerate
 }) }}
+{# End Auto-generate alt text #}
 
+{# Start multi-site checkbox #}
+{{ forms.lightswitchField({
+    label: "Automatically use each site’s language (multi-site)",
+    instructions: "When enabled, the plugin detects the language configured for each site and generates alt text in that language. You can manage sites and languages in <a href=\"" ~ cpUrl('settings/sites') ~ "\"><strong>Settings → Sites</strong></a>."|raw,
+    id: 'autoUseSiteLanguage',
+    name: 'autoUseSiteLanguage',
+    on: settings.autoUseSiteLanguage
+}) }}
+{# End multi-site checkbox #}
+
+{# Start language #}
+{{ forms.selectField({
+    label: "Language",
+    options: languages,
+    id: 'lang',
+    name: 'lang',
+    value: settings.lang ?? 'en',
+    errors: settings.getErrors('lang')
+}) }}
+{# End language #}
+
+{# Start Model type #}
+{{ forms.selectField({
+    label: "Model type",
+    options: modelOptions,
+    id: 'modelName',
+    name: 'modelName',
+    value: settings.modelName ?? 'describe-regular',
+    errors: settings.getErrors('modelName')
+}) }}
+{# End Model type #}
+
+{# Start Field for Alt Text #}
 {% set volumes = craft.app.getVolumes().getAllVolumes() %}
 {% set customFields = [] %}
 {% set customField = {
     label: 'Alt (default)',
-    value: 'alt'
+    value: 'alt',
+    data: {
+        'translation-method': 'site'
+    }
 } %}
 {% set customFields = customFields|merge([customField]) %}
 {% for volume in volumes %}
@@ -74,14 +120,16 @@
         {% if field.className == "craft\\fields\\PlainText" %}
             {% set customField = {
                 label: field.name,
-                value: field.handle
+                value: field.handle,
+                data: {
+                    'translation-method': field.translationMethod
+                }
             } %}
 
             {% set customFields = customFields|merge([customField]) %}
         {% endif %}
     {% endfor %}
 {% endfor %}
-
 
 {{ forms.selectField({
     label: "Field for Alt Text",
@@ -92,26 +140,20 @@
     value: settings.customField ?? 'alt',
     errors: settings.getErrors('customField')
 }) }}
+{# End Field for Alt Text #}
 
-{{ forms.selectField({
-    label: "Model type",
-    options: modelOptions,
-    id: 'modelName',
-    name: 'modelName',
-    value: settings.modelName ?? 'describe-regular',
-    errors: settings.getErrors('modelName')
-}) }}
+{# Start Field for Alt Text multi-site warning #}
+<div data-alttextlab-customfield-warning="1"
+     class="warning"
+     style="margin-top:8px;">
+    <p style="margin:0;">
+        When “Automatically use each site’s language (multi-site)” is enabled, the plugin can only store different alt texts per site/language if the selected field is translatable per-site/per-language.
+        For the default <code>alt</code> field, set it in <a href="{{ cpUrl('settings/assets') }}"><strong>Settings → Assets</strong></a> → your volume → Field layout; for custom fields, set “Translation Method” in <a href="{{ cpUrl('settings/fields') }}"><strong>Settings → Fields</strong></a>.
+    </p>
+</div>
+{# End Field for Alt Text multi-site warning #}
 
-
-{{ forms.selectField({
-    label: "Language",
-    options: languages,
-    id: 'lang',
-    name: 'lang',
-    value: settings.lang ?? 'en',
-    errors: settings.getErrors('lang')
-}) }}
-
+{# Start public checkbox #}
 {{ forms.lightswitchField({
     label: "This site is reachable over the public internet",
     instructions: "",
@@ -119,7 +161,9 @@
     name: 'isPublic',
     on: settings.isPublic
 }) }}
+{# End public checkbox #}
 
+{# Start disable volumes #}
 {% set volumeOptions = [] %}
 {% for volume in volumes %}
     {% set volumeOptions = volumeOptions|merge([{ label: volume.name, value: volume.uid }]) %}
@@ -133,3 +177,63 @@
     options: volumeOptions,
     values: settings.disabledVolumeUids ?? []
 }) }}
+{# End disable volumes #}
+{% js %}
+(() => {
+  const init = () => {
+    const langSelect = document.querySelector('select[name$="[lang]"]');
+    const customFieldSelect = document.querySelector('select[name$="[customField]"]');
+    const warning = document.querySelector('[data-alttextlab-customfield-warning]');
+    const autoLangInput = document.querySelector('input[type="hidden"][name$="[autoUseSiteLanguage]"]');
+
+    if (!langSelect || !customFieldSelect || !warning || !autoLangInput) {
+      return false;
+    }
+
+    const lightswitch = autoLangInput.closest('.field')?.querySelector('.lightswitch');
+    if (!lightswitch) {
+      return false;
+    }
+
+    const isAutoOn = () => autoLangInput.value === '1';
+
+    const apply = () => {
+      const locked = isAutoOn();
+
+      langSelect.disabled = false;
+      langSelect.setAttribute('aria-disabled', locked ? 'true' : 'false');
+
+      const lockTarget =
+        langSelect.closest('.select') ||
+        langSelect.closest('.input') ||
+        langSelect.parentElement;
+
+      if (lockTarget) {
+        lockTarget.classList.toggle('alttextlab-select-locked', locked);
+      }
+
+      warning.hidden = !isAutoOn();
+    };
+
+    if (!lightswitch.dataset.alttextlabBound) {
+      lightswitch.dataset.alttextlabBound = '1';
+      lightswitch.addEventListener('click', () => setTimeout(apply, 0));
+    }
+    if (!customFieldSelect.dataset.alttextlabBound) {
+      customFieldSelect.dataset.alttextlabBound = '1';
+      customFieldSelect.addEventListener('change', apply);
+    }
+
+    apply();
+    return true;
+  };
+
+  const timer = setInterval(() => {
+    if (init()) {
+      clearInterval(timer);
+    }
+  }, 200);
+
+  init();
+})();
+{% endjs %}

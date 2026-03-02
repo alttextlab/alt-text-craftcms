@@ -56,6 +56,8 @@
 
     <h2>Generation history page</h2>
 
+    {% set sitesById = craft.app.sites.getAllSites()|index('id') %}
+
     {% set thumb = {
         mode: 'crop',
         width: 75,
@@ -81,6 +83,7 @@
                 <tr>
                     <th class="text-center">Id</th>
                     <th>Asset</th>
+                    <th>Site</th>
                     <th>Current alt text</th>
                     <th>Generated alt text</th>
                     <th class="text-center">Generation date</th>
@@ -89,11 +92,16 @@
                 </thead>
                 <tbody>
                 {% for asset in assets %}
+                    {% set site = asset.siteId ? (sitesById[asset.siteId] ?? null) : null %}
                     <tr>
                         <td class="text-center">{{ asset.id }}</td>
                         <td>
                             {% if asset.assetId %}
-                                {% set assetRow = craft.assets.id(asset.assetId).one() %}
+                                {% set assetQuery = craft.assets.id(asset.assetId).status(null) %}
+                                {% if asset.siteId %}
+                                    {% set assetQuery = assetQuery.siteId(asset.siteId) %}
+                                {% endif %}
+                                {% set assetRow = assetQuery.one() %}
                                 {% if assetRow %}
                                     {% set imageUrl = assetRow.getUrl(thumb) ?? '' %}
                                     {% set editUrl = assetRow.cpEditUrl ?? '' %}
@@ -111,6 +119,9 @@
                                 {% endif %}
 
                             {% endif %}
+                        </td>
+                        <td>
+                            {{ site ? (site.name ~ ' (' ~ site.language ~ ')') : '—' }}
                         </td>
                         <td>
                             {% if asset.isExistCurrentSelectedFieldInAsset %}

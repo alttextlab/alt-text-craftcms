@@ -3,6 +3,7 @@
 namespace alttextlab\AltTextLab\models;
 
 use alttextlab\AltTextLab\AltTextLab;
+use Craft;
 use craft\base\Model;
 use craft\elements\Asset;
 use DateTime;
@@ -14,6 +15,7 @@ class AltTextLabAsset extends Model
     public ?int $bulkGenerationId = null;
     public ?int $responseId = null;
     public ?string $generatedAltText = null;
+    public ?int $siteId = null;
     public ?DateTime $dateCreated = null;
 
     protected function defineRules(): array
@@ -25,7 +27,15 @@ class AltTextLabAsset extends Model
 
     public function getCurrentAltText()
     {
-        $asset = Asset::find()->id($this->assetId)->one();
+        $query = Asset::find()
+            ->id($this->assetId)
+            ->status(null);
+
+        if ($this->siteId) {
+            $query->siteId($this->siteId);
+        }
+
+        $asset = $query->one();
         $settings = AltTextLab::getInstance()->getSettings();
 
         if ($asset) {
@@ -45,7 +55,15 @@ class AltTextLabAsset extends Model
 
     public function getIsExistCurrentSelectedFieldInAsset()
     {
-        $asset = Asset::find()->id($this->assetId)->one();
+        $query = Asset::find()
+            ->id($this->assetId)
+            ->status(null);
+
+        if ($this->siteId) {
+            $query->siteId($this->siteId);
+        }
+
+        $asset = $query->one();
         $settings = AltTextLab::getInstance()->getSettings();
 
         if ($asset) {

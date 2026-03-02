@@ -16,6 +16,7 @@ use alttextlab\AltTextLab\actions\BulkGeneration;
 use alttextlab\AltTextLab\jobs\GenerateAltTextJob;
 use alttextlab\AltTextLab\models\Settings;
 use alttextlab\AltTextLab\services\ApiService;
+use alttextlab\AltTextLab\services\UtilityService;
 use yii\base\Event;
 
 class AltTextLab extends Plugin
@@ -23,7 +24,7 @@ class AltTextLab extends Plugin
     public static AltTextLab $plugin;
     public bool $hasCpSection = true;
     public bool $hasCpSettings = true;
-    public string $schemaVersion = '1.0.1';
+    public string $schemaVersion = '1.0.2';
 
     public function init(): void
     {
@@ -33,6 +34,12 @@ class AltTextLab extends Plugin
         Craft::$app->onInit(function () {
             $this->attachEventHandlers();
         });
+    }
+
+    public function afterInstall(): void
+    {
+        parent::afterInstall();
+        $this->ensureLangSettingInitialized();
     }
 
     protected function createSettingsModel(): ?Model
@@ -57,6 +64,26 @@ class AltTextLab extends Plugin
         ]);
     }
 
+    private function ensureLangSettingInitialized(): void
+    {
+        $settings = $this->getSettings();
+        if (!empty($settings->lang)) {
+            return;
+        }
+
+        $languages = require $this->getBasePath() . '/configs/Languages.php';
+        $utilityService = new UtilityService();
+        $supportedLookup = $utilityService->buildSupportedLanguageLookup(array_keys($languages));
+
+        $primarySiteLanguage = Craft::$app->getSites()->getPrimarySite()->language ?? 'en';
+        $defaultLang = $utilityService->normalizeCraftLanguageToApi((string)$primarySiteLanguage, $supportedLookup);
+
+        $data = $settings->toArray();
+        $data['lang'] = $defaultLang;
+
+        Craft::$app->getPlugins()->savePluginSettings($this, $data);
+    }
+
     private function attachEventHandlers(): void
     {
         $settings = $this->getSettings();
@@ -76,13 +103,19 @@ class AltTextLab extends Plugin
         });
 
         if ($settings->onUploadGenerate && $settings->apiKey && $account && $account['credits'] > 0) {
+            $primarySiteId = Craft::$app->getSites()->getPrimarySite()->id ?? null;
+
             Event::on(
                 Asset::class,
                 Asset::EVENT_AFTER_PROPAGATE,
-                function (ModelEvent $event) {
-                    if ($event->sender->enabled && $event->sender->getEnabledForSite() && $event->sender->firstSave && $event->sender->alt == "") {
-                        $asset = $event->sender;
+                function (ModelEvent $event) use ($primarySiteId) {
+                    $asset = $event->sender;
 
+                    if ($primarySiteId && (int)$asset->siteId !== (int)$primarySiteId) {
+                        return;
+                    }
+
+                    if ($asset->enabled && $asset->getEnabledForSite() && $asset->firstSave && $asset->alt == "") {
                         Queue::push(new GenerateAltTextJob([
                             'assetId' => $asset->id
                         ]));

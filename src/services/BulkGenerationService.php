@@ -66,8 +66,8 @@ class BulkGenerationService
 
         foreach ($records as $record) {
             $model = new AltTextLabBulkGenerationModel($record->getAttributes());
-            $model->successfulCount = $this->altTextLabAssetService->getTotalCount(['bulkGenerationId'=>$model->id]);
-            $model->failedCount = $this->logService->getTotalCount(['bulkGenerationId'=>$model->id]);
+            $model->successfulCount = $this->altTextLabAssetService->getDistinctAssetCount(['bulkGenerationId'=>$model->id]);
+            $model->failedCount = $this->logService->getDistinctAssetCount(['bulkGenerationId'=>$model->id]);
             $models[] = $model;
         }
 
