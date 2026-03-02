@@ -11,7 +11,7 @@ class AltTextLabLog extends Model
     public ?int $id = null;
     public ?int $assetId = null;
     public ?int $bulkGenerationId = null;
-
+    public ?int $siteId = null;
     public ?string $logMessage = null;
     public ?DateTime $dateCreated = null;
 

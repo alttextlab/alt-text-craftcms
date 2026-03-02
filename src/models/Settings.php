@@ -11,7 +11,8 @@ class Settings extends Model
     public ?bool $onUploadGenerate = true;
     public ?string $customField = 'alt';
     public ?string $modelName = "describe-regular";
-    public ?string $lang = "en";
+    public ?bool $autoUseSiteLanguage = false;
+    public ?string $lang = null;
     public ?bool $isPublic = false;
 
     public ?int $itemPerPage = 10;
