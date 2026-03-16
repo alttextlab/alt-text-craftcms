@@ -1,3 +1,7 @@
+1.4.1 - 2026-03-16
+Added support for zh-Hans (Simplified Chinese) and zh-Hant (Traditional Chinese).
+zh is now used as a fallback language for Chinese dialects that are not explicitly supported.
+
 1.4.0 - 2026-03-02
 Added multi-site support — automatically generate alt text in each site's language
 Set default language from the primary site on install
