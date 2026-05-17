@@ -12,6 +12,8 @@ use alttextlab\AltTextLab\records\AltTextLabAsset as AltTextLabAssetRecord;
 use alttextlab\AltTextLab\AltTextLab;
 use craft\db\Query;
 use craft\base\Field;
+use alttextlab\AltTextLab\services\CommerceService;
+
 
 class AltTextLabAssetsService
 {
@@ -394,11 +396,55 @@ class AltTextLabAssetsService
 
         $lang = $langOverride ?: ($settings->lang ?: 'en');
 
-        return array_merge($body, [
+        $payload = array_merge($body, [
             'source' => 'craftcms',
             'style'  => $settings->modelName,
             'lang'   => $lang,
         ]);
+
+        return $this->enrichBodyWithCommerce($payload, $asset, $settings);
+    }
+
+    private function enrichBodyWithCommerce(array $body, Asset $asset, $settings): array
+    {
+        $commerce = new CommerceService();
+
+        if (!$commerce->isCommerceAvailable()) {
+            return $body;
+        }
+
+        $nameSource = $settings->commerceNameSource ?? 'product';
+        $colorSource = $settings->commerceColorSource ?? 'product';
+        $materialSource = $settings->commerceMaterialSource ?? 'product';
+
+        $brandField = $settings->commerceBrandField ?? '';
+        $colorField = $settings->commerceColorField ?? '';
+        $materialField = $settings->commerceMaterialField ?? '';
+
+        $elements = $commerce->getLinkedCommerceElements($asset);
+
+        $name = $commerce->resolveCommerceProductNameForAsset($elements, $nameSource);
+        $brand = $commerce->resolveCommerceBrandNameForAsset($elements, $brandField);
+        $color = $commerce->resolveCommerceProductColorForAsset($elements, $colorSource, $colorField);
+        $material = $commerce->resolveCommerceProductMaterialForAsset($elements, $materialSource, $materialField);
+
+        if ($name !== '') {
+            $body['product'] = $name;
+        }
+
+        if ($brand !== '') {
+            $body['brand'] = $brand;
+        }
+
+        if ($color !== '') {
+            $body['color'] = $color;
+        }
+
+        if ($material !== '') {
+            $body['material'] = $material;
+        }
+
+        return $body;
     }
 
     private function setAltTextOnAsset($asset, string $altText, $settings): void

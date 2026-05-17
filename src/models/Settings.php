@@ -15,6 +15,14 @@ class Settings extends Model
     public ?string $lang = null;
     public ?bool $isPublic = false;
 
+    public string $commerceNameSource = 'product';
+
+    public ?string $commerceBrandField = null;
+    public string $commerceColorSource = 'product';
+    public ?string $commerceColorField = 'color';
+    public string $commerceMaterialSource = 'product';
+    public ?string $commerceMaterialField = null;
+
     public ?int $itemPerPage = 10;
     public array $disabledVolumeUids = [];
 
