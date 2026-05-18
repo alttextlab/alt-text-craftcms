@@ -4,13 +4,64 @@ namespace alttextlab\AltTextLab\services;
 
 use Craft;
 use craft\elements\Asset;
+use alttextlab\AltTextLab\models\Settings;
 
 class CommerceService
 {
     private const PRODUCT_CLASS = 'craft\\commerce\\elements\\Product';
     private const VARIANT_CLASS = 'craft\\commerce\\elements\\Variant';
 
-    public function getLinkedProductIdsToAsset(Asset $asset): array
+    public function getCommerceData(Asset $asset, Settings $settings): array
+    {
+        if (!$this->isCommerceAvailable()) {
+            return [];
+        }
+
+        $elements = $this->getLinkedCommerceElements($asset);
+
+        if (($elements['product'] ?? null) === null) {
+            return [];
+        }
+
+        $payload = [];
+
+        $nameSource = $settings->commerceNameSource ?? 'product';
+        $colorSource = $settings->commerceColorSource ?? 'product';
+        $materialSource = $settings->commerceMaterialSource ?? 'product';
+        $brandField = trim((string) ($settings->commerceBrandField ?? ''));
+        $colorField = trim((string) ($settings->commerceColorField ?? ''));
+        $materialField = trim((string) ($settings->commerceMaterialField ?? ''));
+
+        $name = $this->resolveCommerceProductNameForAsset($elements, $nameSource);
+        if ($name !== '') {
+            $payload['product'] = $name;
+        }
+
+        if ($brandField !== '') {
+            $brand = $this->getFieldValue($elements['product'], $brandField);
+            if ($brand !== '') {
+                $payload['brand'] = $brand;
+            }
+        }
+
+        if ($colorField !== '') {
+            $color = $this->resolveProductAttribute($elements, $colorSource, $colorField);
+            if ($color !== '') {
+                $payload['color'] = $color;
+            }
+        }
+
+        if ($materialField !== '') {
+            $material = $this->resolveProductAttribute($elements, $materialSource, $materialField);
+            if ($material !== '') {
+                $payload['material'] = $material;
+            }
+        }
+
+        return $payload;
+    }
+
+    private function getLinkedProductIdsToAsset(Asset $asset): array
     {
         if (!$this->isCommerceAvailable()) {
             return [];
@@ -28,7 +79,7 @@ class CommerceService
         return array_map('intval', $productIds->ids());
     }
 
-    public function getLinkedProductVariantIdsToAsset(Asset $asset): array
+    private function getLinkedProductVariantIdsToAsset(Asset $asset): array
     {
         if (!$this->isCommerceAvailable()) {
             return [];
@@ -46,7 +97,7 @@ class CommerceService
         return array_map('intval', $variantIds->ids());
     }
 
-    public function getLatestProductByIds(array $productIds, ?int $siteId = null): ?object
+    private function getLatestProductByIds(array $productIds, ?int $siteId = null): ?object
     {
         if (!$this->isCommerceAvailable() || $productIds === []) {
             return null;
@@ -63,7 +114,7 @@ class CommerceService
         return $query->one();
     }
 
-    public function getLatestVariantByIds(array $variantIds, ?int $siteId = null): ?object
+    private function getLatestVariantByIds(array $variantIds, ?int $siteId = null): ?object
     {
         if (!$this->isCommerceAvailable() || $variantIds === []) {
             return null;
@@ -80,115 +131,89 @@ class CommerceService
         return $query->one();
     }
 
-    public function getLinkedVariantIdsForAssetAndProduct(Asset $asset, int $productId): array
+    private function getLinkedCommerceElements(Asset $asset): array
     {
-        if (!$this->isCommerceAvailable() || $productId <= 0) {
-            return [];
+        $siteId = (int) $asset->siteId;
+
+        $empty = ['product' => null, 'variant' => null];
+        if (!$this->isCommerceAvailable()) {
+            return $empty;
         }
 
-        $siteId = (int) $asset->siteId;
-        $query = self::VARIANT_CLASS::find()
-            ->relatedTo($asset)
-            ->productId($productId);
+        $variantIds = $this->getLinkedProductVariantIdsToAsset($asset);
+        $variant = $this->getLatestVariantByIds($variantIds, $siteId);
+        if ($variant !== null) {
+            $product = $this->getProductForVariant($variant, $siteId);
+            return [
+                'product' => $product,
+                'variant' => $variant,
+            ];
+        }
+
+        $productIds = $this->getLinkedProductIdsToAsset($asset);
+        $product = $this->getLatestProductByIds($productIds, $siteId);
+        return [
+            'product' => $product,
+            'variant' => null,
+        ];
+    }
+
+    private function getProductForVariant(object $variant, int $siteId): ?object
+    {
+        $productId = isset($variant->productId) ? (int) $variant->productId : 0;
+
+        if ($productId === 0) {
+            return method_exists($variant, 'getProduct') ? $variant->getProduct() : null;
+        }
+
+        $query = self::PRODUCT_CLASS::find()->id($productId);
 
         if ($siteId > 0) {
             $query->siteId($siteId);
         }
 
-        return array_map('intval', $query->ids());
+        return $query->one();
     }
 
-    public function getLinkedCommerceElements(Asset $asset): array
+    private function resolveCommerceProductNameForAsset(array $elements, string $nameSource): string
     {
-        $siteId = (int)$asset->siteId;
+        $product = $elements['product'] ?? null;
+        $variant = $elements['variant'] ?? null;
 
-        $variantIds = $this->getLinkedProductVariantIdsToAsset($asset);
-        $productIds = $this->getLinkedProductIdsToAsset($asset);
-
-        $product = $this->getLatestProductByIds($productIds, $siteId);
-        $commonVariant = $this->getLatestVariantByIds($variantIds, $siteId);
-
-        $productVariant = null;
-
-        if ($product !== null) {
-            $variantIdsInProduct = $this->getLinkedVariantIdsForAssetAndProduct($asset, $product->id);
-            $productVariant = $this->getLatestVariantByIds($variantIdsInProduct, $siteId);
+        if ($product === null) {
+            return '';
         }
 
-        return [
-            'product' => $product,
-            'commonVariant' => $commonVariant,
-            'productVariant' => $productVariant
-        ];
-    }
-
-    public function resolveCommerceProductNameForAsset($elements, string $nameSource): string
-    {
-        $product = $elements['product'];
-        $commonVariant = $elements['commonVariant'];
-        $productVariant = $elements['productVariant'];
-
-        if ($product !== null) {
-            if ($productVariant !== null) {
-                return $this->getVariantTitle($productVariant);
-            }
-            return $this->getProductTitle($product);
+        if ($nameSource === 'variant' && $variant !== null) {
+            return $this->getVariantTitle($variant);
         }
 
-        if ($commonVariant !== null) {
-            if ($nameSource === 'product') {
-                $parentProduct = $commonVariant->getProduct();
-                return $parentProduct !== null ? $this->getProductTitle($parentProduct) : '';
-            }
-            return $this->getVariantTitle($commonVariant);
+        return $this->getProductTitle($product);
+    }
+
+    private function resolveProductAttribute(array $elements, string $source, string $field): string
+    {
+        if ($field === '') {
+            return '';
         }
 
-        return '';
-    }
+        $product = $elements['product'] ?? null;
+        $variant = $elements['variant'] ?? null;
 
-    public function resolveCommerceBrandNameForAsset($elements, string $brandField): string
-    {
-        $product = $elements['product'] ?: ($elements['commonVariant'] ? $elements['commonVariant']->getProduct() : null);
-
-        return $this->getFieldValue($product, $brandField);
-    }
-
-    public function resolveCommerceProductColorForAsset($elements, string $colorSource, string $colorField): string
-    {
-        return $this->resolveProductAttribute($elements, $colorSource, $colorField);
-    }
-
-    public function resolveCommerceProductMaterialForAsset($elements, string $materialSource, string $materialField): string
-    {
-        return $this->resolveProductAttribute($elements, $materialSource, $materialField);
-    }
-
-    private function resolveProductAttribute($elements, string $source, string $field): string
-    {
-        $product = $elements['product'];
-        $commonVariant = $elements['commonVariant'];
-        $productVariant = $elements['productVariant'];
-
-        if ($product !== null) {
-            if ($productVariant !== null && $source === 'variant') {
-                return $this->getFieldValue($productVariant, $field);
+        if ($source === 'variant') {
+            if ($variant === null) {
+                return '';
             }
-            if ($source === 'product') {
-                return $this->getFieldValue($product, $field);
-            }
+            return $this->getFieldValue($variant, $field);
         }
 
-        if ($commonVariant !== null) {
-            if ($source === 'product') {
-                return $this->getFieldValue($commonVariant->getProduct(), $field);
-            }
-            return $this->getFieldValue($commonVariant, $field);
+        if ($product === null) {
+            return '';
         }
-
-        return '';
+        return $this->getFieldValue($product, $field);
     }
 
-    public function getFieldValue(?object $element, string $fieldHandle): string
+    private function getFieldValue(?object $element, string $fieldHandle): string
     {
         if ($element === null || $fieldHandle === '' || !method_exists($element, 'getFieldLayout')) {
             return '';
@@ -208,20 +233,20 @@ class CommerceService
         return $stringValue !== '' ? $stringValue : '';
     }
 
-    public function getProductTitle(object $product): string
+    private function getProductTitle(object $product): string
     {
         return isset($product->title)
             ? trim((string)$product->title)
             : '';
     }
 
-    public function getVariantTitle(object $variant): string
+    private function getVariantTitle(object $variant): string
     {
         return isset($variant->title)
             ? trim((string) $variant->title)
             : '';
     }
-    public function isCommerceAvailable(): bool
+    private function isCommerceAvailable(): bool
     {
         return Craft::$app->plugins->isPluginEnabled('commerce');
     }

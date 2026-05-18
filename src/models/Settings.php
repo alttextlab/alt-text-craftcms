@@ -19,7 +19,7 @@ class Settings extends Model
 
     public ?string $commerceBrandField = null;
     public string $commerceColorSource = 'product';
-    public ?string $commerceColorField = 'color';
+    public ?string $commerceColorField = null;
     public string $commerceMaterialSource = 'product';
     public ?string $commerceMaterialField = null;
 

@@ -402,49 +402,10 @@ class AltTextLabAssetsService
             'lang'   => $lang,
         ]);
 
-        return $this->enrichBodyWithCommerce($payload, $asset, $settings);
-    }
-
-    private function enrichBodyWithCommerce(array $body, Asset $asset, $settings): array
-    {
         $commerce = new CommerceService();
+        $commerceData = $commerce->getCommerceData($asset, $settings);
 
-        if (!$commerce->isCommerceAvailable()) {
-            return $body;
-        }
-
-        $nameSource = $settings->commerceNameSource ?? 'product';
-        $colorSource = $settings->commerceColorSource ?? 'product';
-        $materialSource = $settings->commerceMaterialSource ?? 'product';
-
-        $brandField = $settings->commerceBrandField ?? '';
-        $colorField = $settings->commerceColorField ?? '';
-        $materialField = $settings->commerceMaterialField ?? '';
-
-        $elements = $commerce->getLinkedCommerceElements($asset);
-
-        $name = $commerce->resolveCommerceProductNameForAsset($elements, $nameSource);
-        $brand = $commerce->resolveCommerceBrandNameForAsset($elements, $brandField);
-        $color = $commerce->resolveCommerceProductColorForAsset($elements, $colorSource, $colorField);
-        $material = $commerce->resolveCommerceProductMaterialForAsset($elements, $materialSource, $materialField);
-
-        if ($name !== '') {
-            $body['product'] = $name;
-        }
-
-        if ($brand !== '') {
-            $body['brand'] = $brand;
-        }
-
-        if ($color !== '') {
-            $body['color'] = $color;
-        }
-
-        if ($material !== '') {
-            $body['material'] = $material;
-        }
-
-        return $body;
+        return array_merge($payload, $commerceData);
     }
 
     private function setAltTextOnAsset($asset, string $altText, $settings): void
