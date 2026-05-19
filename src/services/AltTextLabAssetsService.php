@@ -405,7 +405,11 @@ class AltTextLabAssetsService
         $commerce = new CommerceService();
         $commerceData = $commerce->getCommerceData($asset, $settings);
 
-        return array_merge($payload, $commerceData);
+        if (!empty($commerceData)) {
+            $payload['ecommerce'] = $commerceData;
+        }
+
+        return $payload;
     }
 
     private function setAltTextOnAsset($asset, string $altText, $settings): void
