@@ -1,3 +1,7 @@
+1.5.0 - 2026-05-26
+Added Craft Commerce integration — when an image is linked to a product or variant, product context (name, brand, color, material) is automatically sent to the API to generate more accurate alt text.
+Configurable via the new Commerce section in plugin settings: choose whether to resolve the product name, color, and material from the product or variant level, and specify custom field handles for brand, color, and material.
+
 1.4.1 - 2026-03-16
 Added support for zh-Hans (Simplified Chinese) and zh-Hant (Traditional Chinese).
 zh is now used as a fallback language for Chinese dialects that are not explicitly supported.

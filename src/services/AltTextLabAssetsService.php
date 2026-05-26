@@ -12,6 +12,8 @@ use alttextlab\AltTextLab\records\AltTextLabAsset as AltTextLabAssetRecord;
 use alttextlab\AltTextLab\AltTextLab;
 use craft\db\Query;
 use craft\base\Field;
+use alttextlab\AltTextLab\services\CommerceService;
+
 
 class AltTextLabAssetsService
 {
@@ -394,11 +396,20 @@ class AltTextLabAssetsService
 
         $lang = $langOverride ?: ($settings->lang ?: 'en');
 
-        return array_merge($body, [
+        $payload = array_merge($body, [
             'source' => 'craftcms',
             'style'  => $settings->modelName,
             'lang'   => $lang,
         ]);
+
+        $commerce = new CommerceService();
+        $commerceData = $commerce->getCommerceData($asset, $settings);
+
+        if (!empty($commerceData)) {
+            $payload['ecommerce'] = $commerceData;
+        }
+
+        return $payload;
     }
 
     private function setAltTextOnAsset($asset, string $altText, $settings): void

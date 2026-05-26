@@ -153,6 +153,75 @@
 </div>
 {# End Field for Alt Text multi-site warning #}
 
+{% if craft.app.plugins.isPluginEnabled('commerce') %}
+    <hr>
+    <h3>Commerce</h3>
+    {{ forms.selectField({
+        label: 'Product name for alt text',
+        instructions: 'How to resolve the product name when an image is linked to Commerce products or variants.',
+        id: 'commerceNameSource',
+        name: 'commerceNameSource',
+        value: settings.commerceNameSource ?? 'product',
+        options: {
+            product: 'Use product name',
+            variant: 'Use variant product name',
+        },
+        errors: settings.getErrors('commerceNameSource')
+    }) }}
+
+
+    {{ forms.textField({
+        label: 'Brand field handle',
+        instructions: 'Handle of the field on the product that stores the brand (e.g. brand). Leave empty to skip.',
+        id: 'commerceBrandField',
+        name: 'commerceBrandField',
+        value: settings.commerceBrandField,
+        errors: settings.getErrors('commerceBrandField')
+    }) }}
+    {# --- Color --- #}
+    {{ forms.selectField({
+        label: 'Color source',
+        id: 'commerceColorSource',
+        name: 'commerceColorSource',
+        value: settings.commerceColorSource ?? 'product',
+        options: {
+            product: 'Use product color field',
+            variant: 'Use variant color field',
+        },
+        errors: settings.getErrors('commerceColorSource')
+    }) }}
+    {{ forms.textField({
+        label: 'Color field handle',
+        instructions: 'Handle on the selected source (product or variant). Leave empty to skip.',
+        id: 'commerceColorField',
+        name: 'commerceColorField',
+        value: settings.commerceColorField,
+        errors: settings.getErrors('commerceColorField')
+    }) }}
+    {# --- Material --- #}
+    {{ forms.selectField({
+        label: 'Material source',
+        id: 'commerceMaterialSource',
+        name: 'commerceMaterialSource',
+        value: settings.commerceMaterialSource ?? 'product',
+        options: {
+            product: 'Use product material field',
+            variant: 'Use variant material field',
+        },
+        errors: settings.getErrors('commerceMaterialSource')
+    }) }}
+    {{ forms.textField({
+        label: 'Material field handle',
+        instructions: 'Handle on the selected source (product or variant). Leave empty to skip.',
+        id: 'commerceMaterialField',
+        name: 'commerceMaterialField',
+        value: settings.commerceMaterialField,
+        errors: settings.getErrors('commerceMaterialField')
+    }) }}
+
+    <hr>
+{% endif %}
+
 {# Start public checkbox #}
 {{ forms.lightswitchField({
     label: "This site is reachable over the public internet",
