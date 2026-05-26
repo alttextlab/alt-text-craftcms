@@ -111,6 +111,62 @@ Notes:
 - You may provide a PCRE pattern with delimiters (e.g., `~/pattern/~i`). If you omit delimiters, the plugin will attempt to wrap your pattern automatically.
 - Regex-based exclusions apply to both automatic generation and bulk operations.
 
+## Craft Commerce Integration
+
+If you have [Craft Commerce](https://craftcms.com/commerce) installed, the plugin can automatically enrich alt text generation with product context. When an image is linked to a Commerce product or variant, the plugin reads product data (name, brand, color, material) and sends it to the AltTextLab API alongside the image. This allows the AI to generate more accurate, product-specific descriptions — for example, *"Blue cotton t-shirt with a round neck"* instead of a generic *"A t-shirt on a white background"*.
+
+The Commerce section appears in plugin settings only when the Commerce plugin is installed and enabled.
+
+### How it works
+
+1. At generation time, the plugin checks whether the asset is related to any Commerce **variant** or **product**.
+2. If a linked variant is found, its parent product is resolved automatically.
+3. The configured product fields (name, brand, color, material) are read and passed to the API as additional context.
+4. If no linked product or variant is found, generation proceeds as usual without any extra context.
+
+### Commerce Settings
+
+All Commerce settings are available under **AltTextLab → Settings → Commerce**.
+
+#### Product name for alt text
+
+Controls which title is sent to the API as the product name:
+
+- **Use product name** *(default)* — uses the title of the linked product.
+- **Use variant title** — uses the title of the linked variant (useful when variant titles carry colour/size information, e.g. *"Blue / XL"*). Falls back to the product title if no variant is linked.
+
+#### Brand field handle
+
+The handle of a Plain Text (or similar) field on the **product** that stores the brand name (e.g. `brand`). Leave empty to skip brand context entirely.
+
+> **Example:** if your products have a field with handle `brand` containing *"Acme Co."*, enter `brand` here and the AI will receive that value as additional context.
+
+#### Color source
+
+Determines which element the color field is read from:
+
+- **Use product color field** *(default)* — reads the color field from the product.
+- **Use variant color field** — reads the color field from the variant (useful for products where color is a variant-level attribute).
+
+#### Color field handle
+
+The handle of the field that stores the color value (e.g. `color`). Can point to the product or variant depending on **Color source**. Leave empty to skip color context.
+
+#### Material source
+
+Determines which element the material field is read from:
+
+- **Use product material field** *(default)* — reads the material field from the product.
+- **Use variant material field** — reads the material field from the variant.
+
+#### Material field handle
+
+The handle of the field that stores the material value (e.g. `material`). Can point to the product or variant depending on **Material source**. Leave empty to skip material context.
+
+---
+
+> **Tip:** You can mix sources. For example, set **Product name** to *Use variant title*, **Color source** to *Use variant color field*, and **Material source** to *Use product material field* — the plugin will read each attribute from the appropriate element independently.
+
 ## Supported File Types
 
 The Alt Text Generator for CraftCMS supports the following image formats:
