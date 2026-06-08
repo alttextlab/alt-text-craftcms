@@ -1,3 +1,6 @@
+1.5.0 - 2026-06-08
+Fixed a bug with excessive API requests
+
 1.5.0 - 2026-05-26
 Added Craft Commerce integration — when an image is linked to a product or variant, product context (name, brand, color, material) is automatically sent to the API to generate more accurate alt text.
 Configurable via the new Commerce section in plugin settings: choose whether to resolve the product name, color, and material from the product or variant level, and specify custom field handles for brand, color, and material.
