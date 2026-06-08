@@ -87,8 +87,6 @@ class AltTextLab extends Plugin
     private function attachEventHandlers(): void
     {
         $settings = $this->getSettings();
-        $apiService = new ApiService();
-        $account = $apiService->GetAccount();
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['alt-text-lab/history'] = 'alt-text-lab/history';
@@ -102,7 +100,7 @@ class AltTextLab extends Plugin
             $event->rules['alt-text-lab/bulk-generation-history/get-current-generation-data'] = 'alt-text-lab/bulk-generation-history/get-current-generation-data';
         });
 
-        if ($settings->onUploadGenerate && $settings->apiKey && $account && $account['credits'] > 0) {
+        if ($settings->onUploadGenerate && $settings->apiKey) {
             $primarySiteId = Craft::$app->getSites()->getPrimarySite()->id ?? null;
 
             Event::on(
@@ -115,7 +113,10 @@ class AltTextLab extends Plugin
                         return;
                     }
 
-                    if ($asset->enabled && $asset->getEnabledForSite() && $asset->firstSave && $asset->alt == "") {
+                    $apiService = new ApiService();
+                    $account = $apiService->getAccount();
+
+                    if ($asset->enabled && $asset->getEnabledForSite() && $asset->firstSave && $asset->alt == "" && $account && $account['credits'] > 0) {
                         Queue::push(new GenerateAltTextJob([
                             'assetId' => $asset->id
                         ]));
