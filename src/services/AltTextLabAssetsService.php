@@ -335,6 +335,11 @@ class AltTextLabAssetsService
             return null;
         }
 
+        if ($response === 'MONTHLY_LIMIT_EXCEEDED') {
+            $this->logService->log($assetId, $bulkGenerationId, 'Monthly usage limit reached. Alt text generation is unavailable until your limit resets or you upgrade your plan.', $siteId);
+            return null;
+        }
+
         $json = json_decode($response, true);
 
         if (!is_array($json) || !isset($json['result'])) {
