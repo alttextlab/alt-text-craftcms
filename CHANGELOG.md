@@ -1,4 +1,4 @@
-1.5.0 - 2026-06-08
+1.5.1 - 2026-06-08
 Fixed a bug with excessive API requests
 
 1.5.0 - 2026-05-26
