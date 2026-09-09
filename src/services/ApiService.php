@@ -86,6 +86,10 @@ class ApiService
                 return 'NOT_ENOUGH_FUNDS';
             }
 
+            if ($statusCode == 429 && isset($responseBodyJson['key']) && $responseBodyJson['key'] === 'MONTHLY_LIMIT_EXCEEDED') {
+                return 'MONTHLY_LIMIT_EXCEEDED';
+            }
+
             return $responseBody;
 
         } catch (Exception $e) {

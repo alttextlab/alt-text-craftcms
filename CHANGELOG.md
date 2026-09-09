@@ -1,3 +1,7 @@
+1.5.2 - 2026-09-09
+Fixed "Setting unknown property: ...::siteId" job failures on fresh installs where the siteId column was missing from the plugin tables
+Install migration now creates the siteId column and index, and an added safety-net migration back-fills it on existing installs
+
 1.5.1 - 2026-06-08
 Fixed a bug with excessive API requests
 
