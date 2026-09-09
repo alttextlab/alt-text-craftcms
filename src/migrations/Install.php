@@ -31,9 +31,12 @@ class Install extends Migration
                 'bulkGenerationId' => $this->integer(),
                 'responseId' => $this->string(128)->notNull(),
                 'generatedAltText' => $this->string(512)->defaultValue(null),
+                'siteId' => $this->integer()->null(),
                 'dateCreated' => $this->dateTime()->notNull(),
             ]
         );
+
+        $this->createIndex('idx_alttextlab_asset_siteId', AltTextLabAsset::tableName, ['siteId']);
 
         $this->addForeignKey(
             null,
@@ -60,9 +63,12 @@ class Install extends Migration
                 'assetId' => $this->integer()->notNull(),
                 'bulkGenerationId' => $this->integer(),
                 'logMessage' => $this->string(512)->defaultValue(null),
+                'siteId' => $this->integer()->null(),
                 'dateCreated' => $this->dateTime()->notNull(),
             ]
         );
+
+        $this->createIndex('idx_alttextlab_log_siteId', AltTextLabLog::tableName, ['siteId']);
 
         $this->addForeignKey(
             null,
